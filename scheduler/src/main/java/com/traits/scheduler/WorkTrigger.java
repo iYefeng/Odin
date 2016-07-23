@@ -28,7 +28,7 @@ import java.util.concurrent.Future;
 @DisallowConcurrentExecution
 public class WorkTrigger implements Job {
 
-    Logger logger = Logger.getLogger("scheduler");
+    static final Logger logger = Logger.getLogger("scheduler");
 
     private String dbtype, host, database, user, passwd, redis_host, redis_db;
     private int port, redis_port, maxActiveCount;
@@ -101,8 +101,10 @@ public class WorkTrigger implements Job {
                                 task.setEndtime(((double) (new Date()).getTime()) / 1000.0);
                                 task.setStatus(BaseTask.Status.FAIL);
                             } else {
+                                logger.debug("Retry this task");
                                 task.setStatus(BaseTask.Status.ACTIVE);
                                 task.setRetry_count(task.getRetry_count() + 1);
+                                task.set_project(null);
                                 // push to redis
                                 redis_handler.getHandler().rpush(
                                         "scheduler.task.queue".getBytes(),
@@ -151,7 +153,8 @@ public class WorkTrigger implements Job {
             if (task == null) return;
 
             if (_workers.getRunningTasks().contains(task.getId().split("#")[0])) {
-                redis_handler.getHandler().rpush("scheduler.task.queue".getBytes(),
+                redis_handler.getHandler().rpush(
+                        "scheduler.task.queue".getBytes(),
                         SerializeUtil.serialize(task));
                 return;
             }

@@ -24,7 +24,7 @@ public class Workers {
 
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-    Logger logger = Logger.getLogger("scheduler");
+    static final Logger logger = Logger.getLogger("scheduler");
 
     private Workers() {
         Configure conf = Configure.getSingleton();

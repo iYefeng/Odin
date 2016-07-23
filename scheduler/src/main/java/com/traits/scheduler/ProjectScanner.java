@@ -26,7 +26,7 @@ public class ProjectScanner {
     private final static ProjectScanner singleton = new ProjectScanner();
     private String dbtype, host, database, table, user, passwd;
     private int port;
-    Logger logger = Logger.getLogger("scheduler");
+    static final Logger logger = Logger.getLogger("scheduler");
 
     private Map<String, BaseProject> _projectMap = new HashMap<String, BaseProject>();
 

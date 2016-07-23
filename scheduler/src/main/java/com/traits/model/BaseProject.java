@@ -79,7 +79,7 @@ public class BaseProject implements Serializable {
     }
 
     public enum Type {
-        UNKNOWN(-1), SHELL(0), PYTHON(1), SHELLSCRIPT(2);
+        UNKNOWN(-1), SHELL(0), PYTHON(1), SHELLSCRIPT(2), PYTHONSCRIPT(3);
 
         private int value;
 
@@ -95,6 +95,8 @@ public class BaseProject implements Serializable {
                     return PYTHON;
                 case 2:
                     return SHELLSCRIPT;
+                case 3:
+                    return PYTHONSCRIPT;
                 default:
                     return UNKNOWN;
             }

@@ -7,11 +7,11 @@ import com.traits.model.BaseTask;
 import java.io.IOException;
 
 /**
- * Created by YeFeng on 2016/7/23.
+ * Created by YeFeng on 2016/7/24.
  */
-public class ShellScript extends BaseExecutor {
+public class PythonScript extends BaseExecutor{
 
-    public ShellScript(BaseTask task) {
+    public PythonScript(BaseTask task) {
         this.task = task;
     }
 
@@ -20,16 +20,20 @@ public class ShellScript extends BaseExecutor {
         if (script == null || script.equals("")) {
             return 0;
         }
+
         StringBuilder sb = new StringBuilder();
         if (args != null) {
             JSONObject obj = JSON.parseObject(args);
             for (Object i : obj.keySet()) {
-                sb.append(String.format("%s='%s'\n", (String) i, obj.getString((String) i)).replace("\"", "\\\""));
+                sb.append(String.format("%s=%s\n", (String) i, obj.getString((String) i).replace("\"", "\\\"")));
             }
         }
-        sb.append(script);
+        sb.append(script.replace("\"", "\\\""));
         logger.debug(sb.toString());
-        String cmd = sb.toString();
+        String pys = sb.toString();
+
+        String cmd = String.format("python << FEOF\n%s\nFEOF\n", pys);
+        logger.debug(cmd);
 
         String[] cmds = { "bash", "-c", cmd };
         Process process;

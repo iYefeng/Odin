@@ -28,6 +28,8 @@ public class Configure {
     public String redis_db = "1";
     public Integer redis_port = 6379;
 
+    public String task_result_base_path;
+
     private Pattern uriReg = Pattern.compile("(\\w+)://(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)/(\\d+)");
 
 
@@ -65,6 +67,8 @@ public class Configure {
                 redis_db = mat.group(4);
             }
         }
+
+        task_result_base_path = confProperties.getProperty("conf.task.result.path", "./");
 
     }
 

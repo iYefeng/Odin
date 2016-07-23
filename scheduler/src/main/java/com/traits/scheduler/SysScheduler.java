@@ -20,7 +20,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class SysScheduler {
 
 
-    Logger logger = Logger.getLogger("scheduler");
+    static final Logger logger = Logger.getLogger("scheduler");
     private Properties confProperties;
     private SchedulerFactory schedFact;
     private static Scheduler sched;

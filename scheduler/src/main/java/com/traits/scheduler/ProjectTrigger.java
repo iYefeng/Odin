@@ -19,7 +19,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 @DisallowConcurrentExecution
 public class ProjectTrigger implements Job {
 
-    Logger logger = Logger.getLogger("scheduler");
+    static final Logger logger = Logger.getLogger("scheduler");
 
     final String TRIGGER_GROUP_NAME = "PROJECTTRIGER";
     final String JOB_GROUP_NAME = "PROJECTJOB";

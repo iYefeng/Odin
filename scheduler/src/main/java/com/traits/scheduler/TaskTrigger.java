@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 @DisallowConcurrentExecution
 public class TaskTrigger implements Job {
 
-    Logger logger = Logger.getLogger("scheduler");
+    static final Logger logger = Logger.getLogger("scheduler");
     private String dbtype, host, database, user, passwd, redis_host, redis_db;
     private int port, redis_port;
 

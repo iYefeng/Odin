@@ -1,16 +1,18 @@
 package com.traits.model;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.traits.db.MySQLHandler;
+import com.traits.executor.BaseExecutor;
+import com.traits.executor.PythonScript;
+import com.traits.executor.ShellScript;
 import com.traits.scheduler.SysScheduler;
 import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 /**
@@ -44,14 +46,18 @@ public class BaseTask implements Callable<Integer>, Serializable {
     static final Logger logger = Logger.getLogger("scheduler");
 
     public Integer call() throws Exception {
-        System.out.println(String.format("\n*** Running task %s\n", name));
-        for (int i = 0; i < 5; ++i) {
-            Thread.sleep(1000);
-            System.out.println(String.format("Sleeping Task %s", name));
+        int status = -1;
+        BaseExecutor eval = null;
+        if (get_project().getType() == BaseProject.Type.SHELLSCRIPT) {
+            eval = new ShellScript(this);
+        } else if (get_project().getType() == BaseProject.Type.PYTHONSCRIPT) {
+            eval = new PythonScript(this);
+        } else {
+            eval = new BaseExecutor(this);
         }
 
-        System.out.println(String.format("\nRunning task %s\n", name));
-        return 0;
+        status = eval.exec(get_project().getScript(), getArgs());
+        return status;
     }
 
 
@@ -109,7 +115,8 @@ public class BaseTask implements Callable<Integer>, Serializable {
     private Double starttime;
     private Double endtime;
     private String args;
-    private String log;
+    private String stderr_path;
+    private String stdout_path;
     private Double dependence_finish_rate;
     private Double triggertime;
     private Integer retry_count;
@@ -142,12 +149,13 @@ public class BaseTask implements Callable<Integer>, Serializable {
         sb.append("`starttime`, ");
         sb.append("`endtime`, ");
         sb.append("`args`, ");
-        sb.append("`log`, ");
+        sb.append("`stderr_path`, ");
+        sb.append("`stdout_path`, ");
         sb.append("`dependence_finish_rate`, ");
         sb.append("`triggertime`, ");
         sb.append("`retry_count`, ");
         sb.append("`working_node`");
-        sb.append(") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        sb.append(") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         ArrayList<Object> tmp = new ArrayList<Object>();
         tmp.add(id);
@@ -159,7 +167,8 @@ public class BaseTask implements Callable<Integer>, Serializable {
         tmp.add(transTimestamp(starttime));
         tmp.add(transTimestamp(endtime));
         tmp.add(args);
-        tmp.add(log);
+        tmp.add(stderr_path);
+        tmp.add(stdout_path);
         tmp.add(dependence_finish_rate);
         tmp.add(transTimestamp(triggertime));
         tmp.add(retry_count);
@@ -197,8 +206,8 @@ public class BaseTask implements Callable<Integer>, Serializable {
         sb.append("starttime: " + starttime + ",\n");
         sb.append("endtime: " + endtime + ",\n");
         sb.append("args: " + args + ",\n");
-        String tmplog = log.length() > 100 ? log.substring(0, 100) + "..." : log;
-        sb.append("log:" + tmplog + ",\n");
+        sb.append("stderr_path:" + stderr_path + ",\n");
+        sb.append("stdout_path:" + stdout_path + ",\n");
         sb.append("dependence_finish_rate: " + dependence_finish_rate + ",\n");
         sb.append("triggertime: " + triggertime + ",\n");
         sb.append("retry_count: " + retry_count + ",\n");
@@ -227,8 +236,10 @@ public class BaseTask implements Callable<Integer>, Serializable {
             this.setEndtime(obj == null ? 0 : (Double) obj);
         } else if (key.equals("args")) {
             this.setArgs((String) obj);
-        } else if (key.equals("log")) {
-            this.setLog((String) obj);
+        } else if (key.equals("stderr_path")) {
+            this.setStderr_path((String) obj);
+        } else if (key.equals("stdout_path")) {
+            this.setStdout_path((String) obj);
         } else if (key.equals("dependence_finish_rate")) {
             if (obj instanceof BigDecimal) {
                 this.setDependence_finish_rate(obj == null ? 0 : ((BigDecimal) obj).doubleValue());
@@ -320,14 +331,6 @@ public class BaseTask implements Callable<Integer>, Serializable {
         this.args = args;
     }
 
-    public String getLog() {
-        return log;
-    }
-
-    public void setLog(String log) {
-        this.log = log;
-    }
-
     public Double getDependence_finish_rate() {
         return dependence_finish_rate;
     }
@@ -366,5 +369,21 @@ public class BaseTask implements Callable<Integer>, Serializable {
 
     public void setWorking_node(String working_node) {
         this.working_node = working_node;
+    }
+
+    public String getStderr_path() {
+        return stderr_path;
+    }
+
+    public void setStderr_path(String stderr_path) {
+        this.stderr_path = stderr_path;
+    }
+
+    public String getStdout_path() {
+        return stdout_path;
+    }
+
+    public void setStdout_path(String stdout_path) {
+        this.stdout_path = stdout_path;
     }
 }

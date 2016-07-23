@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentMap;
  * Created by YeFeng on 2016/7/17.
  */
 public class JythonEvaluable {
-    Logger logger = Logger.getLogger("jython");
+    static Logger logger = Logger.getLogger("jython");
 
     private final String s_functionName;
 

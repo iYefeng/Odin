@@ -31,7 +31,7 @@ import java.util.Properties;
  */
 public class ProjectExecutor implements Job {
 
-    Logger logger = Logger.getLogger("scheduler");
+    static final Logger logger = Logger.getLogger("scheduler");
     private BaseProject project;
     private String dbtype, host, database, table, user, passwd;
     private int port;
@@ -99,6 +99,19 @@ public class ProjectExecutor implements Job {
         String argsJsonStr = JSON.toJSONString(args);
         logger.debug(argsJsonStr);
 
+        try {
+            if (dbtype.equals("mysql")) {
+                _storage = new MySQLStorage(host, port, database, user, passwd);
+            } else if (dbtype.equals("mongodb")) {
+                _storage = new MongoDBStorage(host, port, database, user, passwd);
+            } else {
+                _storage = new MySQLStorage(host, port, database, user, passwd);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
+        }
+
         for (int j = 0; j < project.getNum_workers(); ++j) {
             String taskId = DigestUtils.md5Hex(taskName) + "#" + String.valueOf(j);
             task.setId(taskId);
@@ -109,25 +122,18 @@ public class ProjectExecutor implements Job {
             task.setStatus(BaseTask.Status.INIT);
             task.setArgs(argsJsonStr);
             task.setUpdatetime(((double) starttime.getTime()) / 1000.0);
-
-
-            try {
-                if (dbtype.equals("mysql")) {
-                    _storage = new MySQLStorage(host, port, database, user, passwd);
-                } else if (dbtype.equals("mongodb")) {
-                    _storage = new MongoDBStorage(host, port, database, user, passwd);
-                } else {
-                    _storage = new MySQLStorage(host, port, database, user, passwd);
+            if (_storage != null) {
+                try {
+                    _storage.saveOneTask(task);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                _storage.saveOneTask(task);
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-                e.printStackTrace();
             }
         }
 
-        _storage.release();
+        if (_storage != null) {
+            _storage.release();
+        }
         logger.info("<< ProjectExecutor execute");
     }
 }

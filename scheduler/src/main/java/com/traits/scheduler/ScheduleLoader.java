@@ -11,7 +11,7 @@ import javax.servlet.ServletContextListener;
  */
 public class ScheduleLoader implements ServletContextListener {
 
-    Logger logger = Logger.getLogger("scheduler");
+    static final Logger logger = Logger.getLogger("scheduler");
     private SysScheduler _sysScheduler;
 
     public void contextInitialized(ServletContextEvent servletContextEvent) {
