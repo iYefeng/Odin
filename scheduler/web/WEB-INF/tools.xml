@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toolbox>
+    <tool>
+        <key>tiles</key>
+        <scope>request</scope>
+        <class>org.apache.velocity.tools.struts.TilesTool</class>
+    </tool>
+    <tool>
+        <key>msg</key>
+        <scope>request</scope>
+        <class>org.apache.velocity.tools.struts.MessageTool</class>
+    </tool>
+    <tool>
+        <key>errors</key>
+        <scope>request</scope>
+        <class>org.apache.velocity.tools.struts.ErrorsTool</class>
+    </tool>
+    <tool>
+        <key>form</key>
+        <scope>request</scope>
+        <class>org.apache.velocity.tools.struts.FormTool</class>
+    </tool>
+    <tool>
+        <key>date</key>
+        <scope>application</scope>
+        <class>org.apache.velocity.tools.generic.DateTool</class>
+        <parameter name="format" value="yyyy-MM-dd"/>
+    </tool>
+    <tool>
+        <key>list</key>
+        <scope>application</scope>
+        <class>org.apache.velocity.tools.generic.ListTool</class>
+    </tool>
+    <tool>
+        <key>sort</key>
+        <scope>application</scope>
+        <class>org.apache.velocity.tools.generic.SortTool</class>
+    </tool>
+    <tool>
+        <key>number</key>
+        <scope>application</scope>
+        <class>org.apache.velocity.tools.generic.NumberTool</class>
+    </tool>
+    <tool>
+        <key>alternator</key>
+        <scope>application</scope>
+        <class>org.apache.velocity.tools.generic.AlternatorTool</class>
+        <parameter name="auto-alternate" value="true"/>
+    </tool>
+    <tool>
+        <key>esc</key>
+        <scope>application</scope>
+        <class>org.apache.velocity.tools.generic.EscapeTool</class>
+    </tool>
+</toolbox>

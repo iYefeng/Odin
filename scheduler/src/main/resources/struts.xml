@@ -4,6 +4,10 @@
         "http://struts.apache.org/dtds/struts-2.3.dtd">
 
 <struts>
+    <!-- 支持velocity -->
+    <constant name="struts.velocity.toolboxlocation" value="/WEB-INF/tools.xml" />
+    <constant name="struts.velocity.configfile" value="/WEB-INF/velocity.properties" />
+
     <!-- 支持动态调用 -->
     <constant name="struts.enable.DynamicMethodInvocation" value="true"/>
 
@@ -13,8 +17,14 @@
 
     <package name="front" namespace="/" extends="struts-default">
         <action name="user" class="com.traits.struts.hello.HelloAction">
-            <result name="success">/template/index.jsp</result>
+            <result name="success">/WEB-INF/template/result.vm</result>
         </action>
+        <action name="index" class="com.traits.struts.main.IndexAction">
+            <result name="success">/WEB-INF/template/index2.vm</result>
+        </action>
+
     </package>
+
+
 
 </struts>
