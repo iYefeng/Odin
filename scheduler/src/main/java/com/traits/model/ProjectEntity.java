@@ -22,21 +22,24 @@ import java.util.HashMap;
  `dependence` varchar(1024) DEFAULT NULL,
  `type` tinyint(4) DEFAULT NULL COMMENT '-1:unknown; 0-shell; 1-python; ',
  `user` varchar(128) DEFAULT NULL,
- `pkg` varchar(1024) DEFAULT NULL,
+ `package` varchar(1024) DEFAULT NULL,
+ `execfile` varchar(1024) NOT NULL,
  `updatetime` timestamp NULL DEFAULT NULL,
  `delay` int(11) DEFAULT NULL,
  `emails` varchar(1024) DEFAULT NULL,
  `cellphones` varchar(1024) DEFAULT NULL,
  `args_script` varchar(1024) DEFAULT NULL,
  `retry` tinyint(4) DEFAULT NULL,
+ `script` varchar(10240) DEFAULT NULL,
+ `num_workers` tinyint(4) DEFAULT NULL,
  PRIMARY KEY (`id`),
  KEY `idx_status` (`status`),
- KEY `idx_user` (`user`)
- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+ KEY `idx_user` (`user`),
+ KEY `idx_group` (`group`)
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8
  *
  */
-public class BaseProject implements Serializable {
+public class ProjectEntity implements Serializable {
 
     static final Logger logger = Logger.getLogger("scheduler");
 
@@ -116,6 +119,7 @@ public class BaseProject implements Serializable {
     private Type type;
     private String user;
     private String pkg;
+    private String execfile;
     private Double updatetime;
     private Long delay;
     private String emails;
@@ -128,11 +132,11 @@ public class BaseProject implements Serializable {
 
     private Status _sysStatus;
 
-    public static ArrayList<BaseProject> load(HashMap<String, ArrayList<Object>> map, int count) {
-        ArrayList<BaseProject> projects = new ArrayList<BaseProject>();
+    public static ArrayList<ProjectEntity> load(HashMap<String, ArrayList<Object>> map, int count) {
+        ArrayList<ProjectEntity> projects = new ArrayList<ProjectEntity>();
 
         for (int i = 0; i < count; ++i) {
-            BaseProject tmp = new BaseProject();
+            ProjectEntity tmp = new ProjectEntity();
             for (String key : map.keySet()) {
                 Object obj = map.get(key).get(i);
                 tmp.setKeyValue(key, obj);
@@ -143,7 +147,7 @@ public class BaseProject implements Serializable {
         return projects;
     }
 
-    public void copy(BaseProject other) {
+    public void copy(ProjectEntity other) {
         if (this.id == null) {
             this.id = other.id;
         }
@@ -155,6 +159,7 @@ public class BaseProject implements Serializable {
         this.type = other.type;
         this.user = other.user;
         this.pkg = other.pkg;
+        this.execfile = other.execfile;
         this.updatetime = other.updatetime;
         this.delay = other.delay;
         this.emails = other.emails;
@@ -179,6 +184,7 @@ public class BaseProject implements Serializable {
         sb.append("type: " + type + ",\n");
         sb.append("user: " + user + ",\n");
         sb.append("pkg: " + pkg + ",\n");
+        sb.append("execfile: " + execfile + ",\n");
         sb.append("updatetime: " + String.valueOf(updatetime) + ",\n");
         sb.append("delay: " + String.valueOf(delay) + ",\n");
         sb.append("emails: " + emails + ",\n");
@@ -217,8 +223,10 @@ public class BaseProject implements Serializable {
             this.setType(obj);
         } else if (key.equals("user")) {
             this.setUser((String) obj);
-        } else if (key.equals("pkg")) {
+        } else if (key.equals("package")) {
             this.setPkg((String) obj);
+        } else if (key.equals("execfile")) {
+            this.setExecfile((String) obj);
         } else if (key.equals("updatetime")) {
             this.setUpdatetime(obj == null ? 0 : (Double) obj);
         } else if (key.equals("delay")) {
@@ -400,5 +408,13 @@ public class BaseProject implements Serializable {
 
     public void setNum_workers(Integer num_workers) {
         this.num_workers = num_workers;
+    }
+
+    public String getExecfile() {
+        return execfile;
+    }
+
+    public void setExecfile(String execfile) {
+        this.execfile = execfile;
     }
 }

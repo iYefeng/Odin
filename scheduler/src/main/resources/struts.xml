@@ -1,27 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE struts PUBLIC
-        "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
-        "http://struts.apache.org/dtds/struts-2.3.dtd">
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
 
 <struts>
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true" />
+
     <!-- 支持velocity -->
     <constant name="struts.velocity.toolboxlocation" value="/WEB-INF/tools.xml" />
     <constant name="struts.velocity.configfile" value="/WEB-INF/velocity.properties" />
-
-    <!-- 支持动态调用 -->
-    <constant name="struts.enable.DynamicMethodInvocation" value="true"/>
 
     <!-- 设置开发模式 -->
     <constant name="struts.devMode" value="true"/>
 
 
-    <package name="front" namespace="/" extends="struts-default">
+    
+    <package name="permissionInterceptor" namespace="/" extends="struts-default">
+        <interceptors>
+            <interceptor name="authorityInterceptor" class="com.traits.struts.authority.AuthorityInterceptor"/>
+            <interceptor-stack name="OdinInterceptors">
+                <interceptor-ref name="defaultStack"/>
+                <interceptor-ref name="authorityInterceptor"/>
+            </interceptor-stack>
+        </interceptors>
+        <default-interceptor-ref name="OdinInterceptors"/>
+    </package>
+
+
+    <package name="front" namespace="/" extends="permissionInterceptor">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
         <action name="user" class="com.traits.struts.hello.HelloAction">
             <result name="success">/WEB-INF/template/result.vm</result>
         </action>
+
         <action name="index" class="com.traits.struts.main.IndexAction">
             <result name="success">/WEB-INF/template/index2.vm</result>
+            <result name="login" type="redirectAction">user_login?target=${#request.target}</result>
         </action>
+
+        <action name="user_*" class="com.traits.struts.main.LoginAction" method="{1}">
+            <result name="success" type="redirectAction">index</result>
+            <result name="success_target" type="redirect">${target}</result>
+            <result name="login">/WEB-INF/template/login.vm</result>
+        </action>
+
 
     </package>
 

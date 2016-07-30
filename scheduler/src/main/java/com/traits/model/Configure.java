@@ -5,8 +5,6 @@ import org.apache.log4j.Logger;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Pattern;
 
 /**
@@ -15,7 +13,7 @@ import java.util.regex.Pattern;
 public class Configure {
     private final static Configure singleton = new Configure();
 
-    Logger logger = Logger.getLogger("scheduler");
+    private  static  final  Logger logger = Logger.getLogger("scheduler");
 
     public String dbtype, host, database, user, passwd;
     public int port;
@@ -28,7 +26,8 @@ public class Configure {
     public String redis_db = "1";
     public Integer redis_port = 6379;
 
-    public String task_result_base_path;
+    public String project_package_base_path;
+    public String task_log_base_path;
 
     private Pattern uriReg = Pattern.compile("(\\w+)://(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)/(\\d+)");
 
@@ -58,7 +57,7 @@ public class Configure {
         POOL_SIZE = Integer.valueOf(confProperties.getProperty("conf.worker.threadpool.size", "4"));
         maxActiveCount = Integer.valueOf(confProperties.getProperty("conf.worker.maxActiveCount", "4"));
 
-        String redisTmp = confProperties.getProperty("task.message.queue", "redis://127.0.0.1:6379/1");
+        String redisTmp = confProperties.getProperty("task.message.queue", "redis://127.0.0.1:6379/2");
         java.util.regex.Matcher mat = uriReg.matcher(redisTmp);
         if (mat.find()) {
             if (mat.group(1).equals("redis")) {
@@ -68,7 +67,8 @@ public class Configure {
             }
         }
 
-        task_result_base_path = confProperties.getProperty("conf.task.result.path", "./");
+        project_package_base_path = confProperties.getProperty("conf.project.package.path", "./");
+        task_log_base_path = confProperties.getProperty("conf.task.log.path", "./");
 
     }
 

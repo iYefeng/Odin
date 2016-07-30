@@ -12,13 +12,10 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -64,7 +61,7 @@ public class WorkTrigger implements Job {
         logger.info(">> WorkTrigger execute");
 
         BaseStorage _storage = null;
-        BaseProject project = null;
+        ProjectEntity project = null;
 
         try {
             if (dbtype.equals("mysql")) {
@@ -82,12 +79,12 @@ public class WorkTrigger implements Job {
 
         if (redis_handler != null) {
 
-            Workers _workers = Workers.getSingleton();
+            WorkersPool _workers = WorkersPool.getSingleton();
 
-            Iterator<Map.Entry<BaseTask, Future<Integer>>> it = _workers.getFutureList().entrySet().iterator();
+            Iterator<Map.Entry<TaskEntity, Future<Integer>>> it = _workers.getFutureList().entrySet().iterator();
             while (it.hasNext()) {
-                Map.Entry<BaseTask, Future<Integer>> kvTask = it.next();
-                BaseTask task = kvTask.getKey();
+                Map.Entry<TaskEntity, Future<Integer>> kvTask = it.next();
+                TaskEntity task = kvTask.getKey();
                 Future<Integer> future = kvTask.getValue();
                 if (future.isDone())  {
                     task.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
@@ -95,14 +92,14 @@ public class WorkTrigger implements Job {
                     try {
                         if (future.get() == 0) {
                             task.setEndtime(((double) (new Date()).getTime()) / 1000.0);
-                            task.setStatus(BaseTask.Status.SUCCESS);
+                            task.setStatus(TaskEntity.Status.SUCCESS);
                         } else {
                             if (task.getRetry_count() >= task.get_project().getRetry()) {
                                 task.setEndtime(((double) (new Date()).getTime()) / 1000.0);
-                                task.setStatus(BaseTask.Status.FAIL);
+                                task.setStatus(TaskEntity.Status.FAIL);
                             } else {
                                 logger.debug("Retry this task");
-                                task.setStatus(BaseTask.Status.ACTIVE);
+                                task.setStatus(TaskEntity.Status.ACTIVE);
                                 task.setRetry_count(task.getRetry_count() + 1);
                                 task.set_project(null);
                                 // push to redis
@@ -125,7 +122,7 @@ public class WorkTrigger implements Job {
                 } else if (future.isCancelled()) {
                     task.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
                     task.setEndtime(((double) (new Date()).getTime()) / 1000.0);
-                    task.setStatus(BaseTask.Status.DELETE);
+                    task.setStatus(TaskEntity.Status.DELETE);
                     it.remove();
                     _workers.getRunningTasks().remove(task.getId().split("#")[0]);
                 } else {
@@ -149,7 +146,7 @@ public class WorkTrigger implements Job {
 
             byte[] task_s = redis_handler.getHandler().lpop("scheduler.task.queue".getBytes());
             if (task_s == null) return;
-            BaseTask task = (BaseTask) SerializeUtil.unserialize(task_s);
+            TaskEntity task = (TaskEntity) SerializeUtil.unserialize(task_s);
             if (task == null) return;
 
             if (_workers.getRunningTasks().contains(task.getId().split("#")[0])) {
@@ -170,7 +167,7 @@ public class WorkTrigger implements Job {
 
             if (project == null) {
                 logger.info("project is not found");
-                task.setStatus(BaseTask.Status.DELETE);
+                task.setStatus(TaskEntity.Status.DELETE);
                 try {
                     _storage.saveOneTask(task);
                 } catch (Exception e) {
@@ -180,10 +177,10 @@ public class WorkTrigger implements Job {
                 return;
             }
 
-            if (project.getStatus() == BaseProject.Status.RUNNING
-                    || project.getStatus() == BaseProject.Status.DEBUG) {
+            if (project.getStatus() == ProjectEntity.Status.RUNNING
+                    || project.getStatus() == ProjectEntity.Status.DEBUG) {
                 // run task
-                task.setStatus(BaseTask.Status.RUNNING);
+                task.setStatus(TaskEntity.Status.RUNNING);
                 try {
                     _storage.saveOneTask(task);
                 } catch (Exception e) {
@@ -192,9 +189,9 @@ public class WorkTrigger implements Job {
                 }
                 task.set_project(project);
                 _workers.submitTask(task);
-            } else if (project.getStatus() == BaseProject.Status.DELETE) {
+            } else if (project.getStatus() == ProjectEntity.Status.DELETE) {
                 // pass
-                task.setStatus(BaseTask.Status.DELETE);
+                task.setStatus(TaskEntity.Status.DELETE);
                 try {
                     _storage.saveOneTask(task);
                 } catch (Exception e) {
@@ -202,7 +199,7 @@ public class WorkTrigger implements Job {
                     e.printStackTrace();
                 }
             } else {
-                task.setStatus(BaseTask.Status.STOP);
+                task.setStatus(TaskEntity.Status.STOP);
                 try {
                     _storage.saveOneTask(task);
                 } catch (Exception e) {

@@ -11,7 +11,7 @@ public class WebAppContextWithWarServer {
         String root = System.getProperty("user.dir");
         System.out.println(root);
         context.setContextPath("/myapp");
-        context.setWar("scheduler/target/scheduler-1.0-SNAPSHOT.war");
+        context.setWar("target/scheduler-1.0-SNAPSHOT.war");
         //context.setWar("scheduler/target/scheduler.war");
         //context.setContextPath("/test");
         //context.setDescriptor(root + "/scheduler/out/artifacts/scheduler_war_exploded/WEB-INF/web.xml");

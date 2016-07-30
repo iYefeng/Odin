@@ -1,14 +1,11 @@
 package com.traits.storage;
 
+import com.traits.model.TaskEntity;
 import org.apache.commons.lang3.StringUtils;
 import com.traits.db.MySQLHandler;
-import com.traits.model.BaseProject;
-import com.traits.model.BaseTask;
-import com.traits.scheduler.SysScheduler;
-import com.traits.util.Crontab;
+import com.traits.model.ProjectEntity;
 
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -39,42 +36,42 @@ public class MySQLStorage extends BaseStorage {
         handler.release();
     }
 
-    public ArrayList<BaseProject> getProjects() throws SQLException {
+    public ArrayList<ProjectEntity> getProjects() throws SQLException {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT * from `projectdb`");
-        return BaseProject.load(result, handler.getCurrentCount());
+        return ProjectEntity.load(result, handler.getCurrentCount());
     }
 
-    public ArrayList<BaseProject> getProjects(String[] fields) throws SQLException {
+    public ArrayList<ProjectEntity> getProjects(String[] fields) throws SQLException {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT %s from `projectdb`",
                 new String[]{StringUtils.join(fields, ", ")});
-        return BaseProject.load(result, handler.getCurrentCount());
+        return ProjectEntity.load(result, handler.getCurrentCount());
     }
 
-    public BaseProject getProjectById(String pid) throws SQLException {
+    public ProjectEntity getProjectById(String pid) throws SQLException {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT * from `projectdb` WHERE `id`='%s'",
                 new String[]{pid});
-        ArrayList<BaseProject> projects = BaseProject.load(result, handler.getCurrentCount());
+        ArrayList<ProjectEntity> projects = ProjectEntity.load(result, handler.getCurrentCount());
         return projects.size() == 0 ? null : projects.get(0);
     }
 
-    public boolean saveOneTask(BaseTask task) throws SQLException {
+    public boolean saveOneTask(TaskEntity task) throws SQLException {
         boolean flag =  task.saveTask(handler);
         return flag;
     }
 
-    public ArrayList<BaseTask> getInitTasks() throws Exception {
+    public ArrayList<TaskEntity> getInitTasks() throws Exception {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT * from `taskdb` where `status`=0");
-        return BaseTask.load(result, handler.getCurrentCount());
+        return TaskEntity.load(result, handler.getCurrentCount());
     }
 
-    public ArrayList<BaseTask> getCheckingTasks() throws Exception {
+    public ArrayList<TaskEntity> getCheckingTasks() throws Exception {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT * from `taskdb` where `status`=7");
-        return BaseTask.load(result, handler.getCurrentCount());
+        return TaskEntity.load(result, handler.getCurrentCount());
     }
 
-    public ArrayList<BaseTask> getActiveTasks() throws Exception {
+    public ArrayList<TaskEntity> getActiveTasks() throws Exception {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT * from `taskdb` where `status`=1");
-        return BaseTask.load(result, handler.getCurrentCount());
+        return TaskEntity.load(result, handler.getCurrentCount());
     }
 
     public HashSet<String> getSuccessOrPassedTasks() throws Exception {
@@ -97,9 +94,9 @@ public class MySQLStorage extends BaseStorage {
 
     public static void main(String[] args) throws SQLException {
         MySQLStorage ms = new MySQLStorage("127.0.0.1", 3306, "scheduler", "dev", "123456");
-        ArrayList<BaseProject> projects = ms.getProjects();
+        ArrayList<ProjectEntity> projects = ms.getProjects();
 
-        for (BaseProject i : projects) {
+        for (ProjectEntity i : projects) {
             System.out.println(i.toString());
         }
 

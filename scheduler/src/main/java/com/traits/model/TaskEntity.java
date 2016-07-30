@@ -1,17 +1,13 @@
 package com.traits.model;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.traits.db.MySQLHandler;
 import com.traits.executor.BaseExecutor;
 import com.traits.executor.PythonScript;
 import com.traits.executor.ShellScript;
-import com.traits.scheduler.SysScheduler;
 import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -41,16 +37,16 @@ import java.util.concurrent.Callable;
  KEY `idx_lunchtime` (`lunchtime`)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
  */
-public class BaseTask implements Callable<Integer>, Serializable {
+public class TaskEntity implements Callable<Integer>, Serializable {
 
     static final Logger logger = Logger.getLogger("scheduler");
 
     public Integer call() throws Exception {
         int status = -1;
         BaseExecutor eval = null;
-        if (get_project().getType() == BaseProject.Type.SHELLSCRIPT) {
+        if (get_project().getType() == ProjectEntity.Type.SHELLSCRIPT) {
             eval = new ShellScript(this);
-        } else if (get_project().getType() == BaseProject.Type.PYTHONSCRIPT) {
+        } else if (get_project().getType() == ProjectEntity.Type.PYTHONSCRIPT) {
             eval = new PythonScript(this);
         } else {
             eval = new BaseExecutor(this);
@@ -122,7 +118,7 @@ public class BaseTask implements Callable<Integer>, Serializable {
     private Integer retry_count;
     private String working_node;
 
-    private BaseProject _project;
+    private ProjectEntity _project;
 
     public Date transTimestamp(Double ts) {
         Long _timestamp;
@@ -180,11 +176,11 @@ public class BaseTask implements Callable<Integer>, Serializable {
         return  handler.executeMany(SQL, dataList);
     }
 
-    public static ArrayList<BaseTask> load(HashMap<String, ArrayList<Object>> map, int count) {
-        ArrayList<BaseTask> tasks = new ArrayList<BaseTask>();
+    public static ArrayList<TaskEntity> load(HashMap<String, ArrayList<Object>> map, int count) {
+        ArrayList<TaskEntity> tasks = new ArrayList<TaskEntity>();
 
         for (int i = 0; i < count; ++i) {
-            BaseTask tmp = new BaseTask();
+            TaskEntity tmp = new TaskEntity();
             for (String key : map.keySet()) {
                 Object obj = map.get(key).get(i);
                 tmp.setKeyValue(key, obj);
@@ -355,11 +351,11 @@ public class BaseTask implements Callable<Integer>, Serializable {
         this.retry_count = retry_count;
     }
 
-    public BaseProject get_project() {
+    public ProjectEntity get_project() {
         return _project;
     }
 
-    public void set_project(BaseProject _project) {
+    public void set_project(ProjectEntity _project) {
         this._project = _project;
     }
 

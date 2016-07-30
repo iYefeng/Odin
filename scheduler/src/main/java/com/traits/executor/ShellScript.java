@@ -2,7 +2,7 @@ package com.traits.executor;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.traits.model.BaseTask;
+import com.traits.model.TaskEntity;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ import java.io.IOException;
  */
 public class ShellScript extends BaseExecutor {
 
-    public ShellScript(BaseTask task) {
+    public ShellScript(TaskEntity task) {
         this.task = task;
     }
 

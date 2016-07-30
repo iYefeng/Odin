@@ -1,8 +1,6 @@
 package com.traits.executor;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.traits.model.BaseTask;
+import com.traits.model.TaskEntity;
 import com.traits.model.Configure;
 import org.apache.log4j.Logger;
 
@@ -13,23 +11,28 @@ import java.io.*;
  */
 public class BaseExecutor extends Thread {
 
-    public static Logger logger = Logger.getLogger("executor");
+    static final Logger logger = Logger.getLogger("executor");
 
     InputStream is;
     String type;
-    BaseTask task;
+    TaskEntity task;
 
-    public BaseExecutor(InputStream is, String type, BaseTask task) {
+    public BaseExecutor(InputStream is, String type, TaskEntity task) {
         this.is = is;
         this.type = type;
         this.task = task;
     }
 
-    public BaseExecutor(BaseTask task) {
+    public BaseExecutor(TaskEntity task) {
         this.task = task;
     }
 
     public BaseExecutor() {
+    }
+
+    public boolean initWorkSpace() {
+
+        return true;
     }
 
     public void run() {
@@ -44,7 +47,7 @@ public class BaseExecutor extends Thread {
             String user = task.get_project().getUser();
             Configure conf = Configure.getSingleton();
 
-            String path = String.format("%sresult/%s/tmp/%s/", conf.task_result_base_path, user, taskid);
+            String path = String.format("%slog/%s/tmp/%s/", conf.task_log_base_path, user, taskid);
             File dir = new File(path);
             if (!dir.exists()) {
                 dir.mkdirs();
@@ -103,7 +106,7 @@ public class BaseExecutor extends Thread {
     public static void main(String[] args) {
         BaseExecutor eval = new BaseExecutor();
 
-        eval.exec("cd /home/YeFeng/ \n pwd \n tree | wc -l \n date", null);
+        //eval.exec("cd /home/YeFeng/ \n pwd \n tree | wc -l \n date", null);
     }
 
 

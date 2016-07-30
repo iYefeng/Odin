@@ -1,10 +1,8 @@
 package com.traits.scheduler;
 
-import com.alibaba.fastjson.JSONObject;
-import com.traits.db.MySQLHandler;
 import com.traits.jython.JythonEvaluable;
-import com.traits.model.BaseProject;
-import com.traits.model.BaseTask;
+import com.traits.model.ProjectEntity;
+import com.traits.model.TaskEntity;
 import com.traits.model.Configure;
 import com.traits.storage.BaseStorage;
 import com.traits.storage.MongoDBStorage;
@@ -17,13 +15,10 @@ import org.quartz.JobExecutionException;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Properties;
 
 
 /**
@@ -32,7 +27,7 @@ import java.util.Properties;
 public class ProjectExecutor implements Job {
 
     static final Logger logger = Logger.getLogger("scheduler");
-    private BaseProject project;
+    private ProjectEntity project;
     private String dbtype, host, database, table, user, passwd;
     private int port;
 
@@ -54,10 +49,10 @@ public class ProjectExecutor implements Job {
         BaseStorage _storage = null;
 
         JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
-        this.project = (BaseProject) jobDataMap.get("currentProject");
+        this.project = (ProjectEntity) jobDataMap.get("currentProject");
 
         logger.debug("running project Id: " + project.getId());
-        BaseTask task = new BaseTask();
+        TaskEntity task = new TaskEntity();
 
         Date starttime = new Date();
         Date lunchTime;
@@ -119,7 +114,7 @@ public class ProjectExecutor implements Job {
             task.setName(taskName);
             task.setLunchtime(((double) lunchTime.getTime()) / 1000.0);
             task.setStarttime(((double) starttime.getTime()) / 1000.0);
-            task.setStatus(BaseTask.Status.INIT);
+            task.setStatus(TaskEntity.Status.INIT);
             task.setArgs(argsJsonStr);
             task.setUpdatetime(((double) starttime.getTime()) / 1000.0);
             if (_storage != null) {

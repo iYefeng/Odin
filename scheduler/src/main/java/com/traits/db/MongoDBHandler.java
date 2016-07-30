@@ -52,7 +52,7 @@ public class MongoDBHandler {
     }
 
     public static void main(String[] args) {
-        MongoDBHandler handler = new MongoDBHandler("192.168.238.200", 27017, "resultdb", null, null);
+        MongoDBHandler handler = new MongoDBHandler("127.0.0.1", 27017, "resultdb", null, null);
         Bson filter = new BasicDBObject().append("_id", new ObjectId("57371f53a7277f85daa71f94"));
         List<Document> docs = handler.find("QQ_TEST1", filter);
         for (Document doc : docs) {

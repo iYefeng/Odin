@@ -1,6 +1,6 @@
 package com.traits.scheduler;
 
-import com.traits.model.BaseProject;
+import com.traits.model.ProjectEntity;
 import org.apache.log4j.Logger;
 import org.quartz.*;
 
@@ -26,19 +26,19 @@ public class ProjectTrigger implements Job {
     Scheduler sched = SysScheduler.getScheduler();
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        logger.info(">> ProjectTrigger execute");
+        logger.info(">> ProjectTrigger STARTING");
         ProjectScanner _projectscanner = ProjectScanner.getInstance();
         boolean flag = _projectscanner.loadProjects();
         if (flag) {
-            Map<String, BaseProject> projectMap = _projectscanner.get_projectMap();
+            Map<String, ProjectEntity> projectMap = _projectscanner.get_projectMap();
 
-            for (Map.Entry<String, BaseProject> item : projectMap.entrySet()) {
-                BaseProject p = item.getValue();
-                if (p.get_sysStatus() == BaseProject.Status.ADDED) {
+            for (Map.Entry<String, ProjectEntity> item : projectMap.entrySet()) {
+                ProjectEntity p = item.getValue();
+                if (p.get_sysStatus() == ProjectEntity.Status.ADDED) {
 
                     try {
-                        if (p.getStatus() == BaseProject.Status.RUNNING
-                                || p.getStatus() == BaseProject.Status.DEBUG) {
+                        if (p.getStatus() == ProjectEntity.Status.RUNNING
+                                || p.getStatus() == ProjectEntity.Status.DEBUG) {
                             logger.debug("Add a running project");
                             JobDetail jobDetail = newJob(ProjectExecutor.class)
                                     .withIdentity(p.getId(), JOB_GROUP_NAME).build();
@@ -72,8 +72,8 @@ public class ProjectTrigger implements Job {
                         e.printStackTrace();
                     } //
 
-                    p.set_sysStatus(BaseProject.Status.DONE);
-                } else if (p.get_sysStatus() == BaseProject.Status.MODIFIED) {
+                    p.set_sysStatus(ProjectEntity.Status.DONE);
+                } else if (p.get_sysStatus() == ProjectEntity.Status.MODIFIED) {
 
                     try {
                         sched.pauseTrigger(new TriggerKey(p.getId(), TRIGGER_GROUP_NAME));
@@ -86,8 +86,8 @@ public class ProjectTrigger implements Job {
 
                     try {
                         // add new task
-                        if (p.getStatus() == BaseProject.Status.RUNNING
-                                || p.getStatus() == BaseProject.Status.DEBUG) {
+                        if (p.getStatus() == ProjectEntity.Status.RUNNING
+                                || p.getStatus() == ProjectEntity.Status.DEBUG) {
                             JobDetail jobDetail = newJob(ProjectExecutor.class)
                                     .withIdentity(p.getId(), JOB_GROUP_NAME).build();
                             jobDetail.getJobDataMap().put("currentProject", p);
@@ -118,8 +118,8 @@ public class ProjectTrigger implements Job {
                         e.printStackTrace();
                     }
 
-                    p.set_sysStatus(BaseProject.Status.DONE);
-                } else if (p.get_sysStatus() == BaseProject.Status.DELETE) {
+                    p.set_sysStatus(ProjectEntity.Status.DONE);
+                } else if (p.get_sysStatus() == ProjectEntity.Status.DELETE) {
                     try {
                         sched.pauseTrigger(new TriggerKey(p.getId(), TRIGGER_GROUP_NAME));
                         sched.unscheduleJob(new TriggerKey(p.getId(), TRIGGER_GROUP_NAME));
@@ -130,15 +130,15 @@ public class ProjectTrigger implements Job {
                         e.printStackTrace();
                     }
 
-                    p.setStatus(BaseProject.Status.DELETE);
-                    p.set_sysStatus(BaseProject.Status.DONE);
+                    p.setStatus(ProjectEntity.Status.DELETE);
+                    p.set_sysStatus(ProjectEntity.Status.DONE);
                 }
             }
 
 
         }
 
-        logger.info("<< ProjectTrigger execute");
+        logger.info("<< ProjectTrigger STOPPED");
     }
 
 }

@@ -1,8 +1,8 @@
 package com.traits.scheduler;
 
 import com.traits.db.RedisHandler;
-import com.traits.model.BaseProject;
-import com.traits.model.BaseTask;
+import com.traits.model.ProjectEntity;
+import com.traits.model.TaskEntity;
 import com.traits.model.Configure;
 import com.traits.model.TaskCache;
 import com.traits.storage.BaseStorage;
@@ -17,8 +17,6 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -37,10 +35,10 @@ public class TaskTrigger implements Job {
 
     private static RedisHandler redis_handler = null;
 
-    private HashMap<String, BaseProject> _projectMap;
-    private HashMap<String, BaseTask> _initTaskMap;
-    private HashMap<String, BaseTask> _checkingTaskMap;
-    private HashMap<String, BaseTask> _activeTaskMap;
+    private HashMap<String, ProjectEntity> _projectMap;
+    private HashMap<String, TaskEntity> _initTaskMap;
+    private HashMap<String, TaskEntity> _checkingTaskMap;
+    private HashMap<String, TaskEntity> _activeTaskMap;
     private HashSet<String> _successOrPassedTaskSet;
 
     private static SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -77,29 +75,29 @@ public class TaskTrigger implements Job {
     }
 
     public void loadProjects(BaseStorage _storage) throws Exception {
-        _projectMap = new HashMap<String, BaseProject>();
-        for (BaseProject p : _storage.getProjects()) {
+        _projectMap = new HashMap<String, ProjectEntity>();
+        for (ProjectEntity p : _storage.getProjects()) {
             _projectMap.put(p.getId(), p);
         }
     }
 
     public void loadInitTasks(BaseStorage _storage) throws Exception {
-        _initTaskMap = new HashMap<String, BaseTask>();
-        for (BaseTask t : _storage.getInitTasks()) {
+        _initTaskMap = new HashMap<String, TaskEntity>();
+        for (TaskEntity t : _storage.getInitTasks()) {
             _initTaskMap.put(t.getId(), t);
         }
     }
 
     public void loadCheckingTasks(BaseStorage _storage) throws Exception {
-        _checkingTaskMap = new HashMap<String, BaseTask>();
-        for (BaseTask t : _storage.getCheckingTasks()) {
+        _checkingTaskMap = new HashMap<String, TaskEntity>();
+        for (TaskEntity t : _storage.getCheckingTasks()) {
             _checkingTaskMap.put(t.getId(), t);
         }
     }
 
     public void loadActiveTasks(BaseStorage _storage) throws Exception {
-        _activeTaskMap = new HashMap<String, BaseTask>();
-        for (BaseTask t : _storage.getActiveTasks()) {
+        _activeTaskMap = new HashMap<String, TaskEntity>();
+        for (TaskEntity t : _storage.getActiveTasks()) {
             _activeTaskMap.put(t.getId(), t);
         }
     }
@@ -133,8 +131,8 @@ public class TaskTrigger implements Job {
     }
 
 
-    public ArrayList<String> parseDependence(BaseProject _self,
-                                             HashMap<String, BaseProject> _projectMap,
+    public ArrayList<String> parseDependence(ProjectEntity _self,
+                                             HashMap<String, ProjectEntity> _projectMap,
                                              Date lunchDate) {
         ArrayList<String> dep = new ArrayList<String>();
 
@@ -169,7 +167,7 @@ public class TaskTrigger implements Job {
                             Method method = this.getClass().getMethod(fun, double.class, int.class);
                             Date base = (Date) method.invoke(null, lunchTimeStamp, delta);
                             if (_projectMap.containsKey(pid)) {
-                                BaseProject p = _projectMap.get(pid);
+                                ProjectEntity p = _projectMap.get(pid);
                                 Date tmpd2 = new Date(base.getTime() + offset * 1000);
                                 if (tmpd2.getTime() > lunchDate.getTime()) {
                                     logger.warn("basetime is not allowed before lunchtime");
@@ -200,9 +198,9 @@ public class TaskTrigger implements Job {
     }
 
     public boolean checkTask(HashSet<String> _successOrPassedTaskSet,
-                             HashMap<String, BaseProject> _projectMap,
-                             BaseProject project,
-                             BaseTask task,
+                             HashMap<String, ProjectEntity> _projectMap,
+                             ProjectEntity project,
+                             TaskEntity task,
                              Date lunchDate) {
         if (project.getDependence() == null || project.getDependence().equals("")) {
             task.setDependence_finish_rate(1.0);
@@ -252,12 +250,12 @@ public class TaskTrigger implements Job {
             return;
         }
 
-        TreeMap<Double, BaseTask> taskCacheMap = tc.get_taskMap();
-        for (BaseTask task : _checkingTaskMap.values()) {
+        TreeMap<Double, TaskEntity> taskCacheMap = tc.get_taskMap();
+        for (TaskEntity task : _checkingTaskMap.values()) {
             taskCacheMap.put(task.getTriggertime(), task);
         }
 
-//        for (BaseTask task : _activeTaskMap.values()) {
+//        for (TaskEntity task : _activeTaskMap.values()) {
 //            task.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
 //            try {
 //                _storage.saveOneTask(task);
@@ -306,18 +304,18 @@ public class TaskTrigger implements Job {
             return;
         }
 
-        for (Map.Entry<String, BaseTask> kv : _initTaskMap.entrySet()) {
-            BaseTask t = kv.getValue();
+        for (Map.Entry<String, TaskEntity> kv : _initTaskMap.entrySet()) {
+            TaskEntity t = kv.getValue();
             String pid = t.getProject_id();
             if (_projectMap.containsKey(pid)) {
-                BaseProject p = _projectMap.get(pid);
+                ProjectEntity p = _projectMap.get(pid);
                 if ( (((long)((t.getLunchtime() + p.getDelay()) * 1000)) < (new Date()).getTime()
                         && checkTask(_successOrPassedTaskSet, _projectMap, p, t, new Date((new Double(t.getLunchtime() * 1000)).longValue())))
 
-                        || t.getStatus() == BaseTask.Status.FORCERUNNING) {
+                        || t.getStatus() == TaskEntity.Status.FORCERUNNING) {
 
                     // the task satifies dependence
-                    t.setStatus(BaseTask.Status.ACTIVE);
+                    t.setStatus(TaskEntity.Status.ACTIVE);
                     t.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
                     try {
                         _storage.saveOneTask(t);
@@ -332,7 +330,7 @@ public class TaskTrigger implements Job {
                     }
                 } else {
                     // task does not satifies dependence
-                    t.setStatus(BaseTask.Status.CHECKING);
+                    t.setStatus(TaskEntity.Status.CHECKING);
                     t.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
                     t.setTriggertime((((new Date()).getTime() + triggerDelta * 1000) / 1000.0 + p.getDelay()));
                     try {
@@ -346,23 +344,23 @@ public class TaskTrigger implements Job {
             }
         }
 
-        TreeMap<Double, BaseTask> tset = tc.get_taskMap();
+        TreeMap<Double, TaskEntity> tset = tc.get_taskMap();
 
         while (!tset.isEmpty()) {
-            Map.Entry<Double, BaseTask> t = tset.firstEntry();
+            Map.Entry<Double, TaskEntity> t = tset.firstEntry();
             Double triggerTime = t.getKey();
-            BaseTask task = t.getValue();
+            TaskEntity task = t.getValue();
 
             if (triggerTime < ((new Date()).getTime() / 1000.0)) {
                 String pid = task.getProject_id();
                 if (_projectMap.containsKey(pid)) {
-                    BaseProject p = _projectMap.get(pid);
-                    if (p.getStatus() == BaseProject.Status.RUNNING
-                            || p.getStatus() == BaseProject.Status.DEBUG) {   // running or debug
+                    ProjectEntity p = _projectMap.get(pid);
+                    if (p.getStatus() == ProjectEntity.Status.RUNNING
+                            || p.getStatus() == ProjectEntity.Status.DEBUG) {   // running or debug
                         if (checkTask(_successOrPassedTaskSet, _projectMap, p, task,
                                 new Date((new Double(task.getLunchtime() * 1000)).longValue()))){
                             // the task satifies dependence
-                            task.setStatus(BaseTask.Status.ACTIVE);
+                            task.setStatus(TaskEntity.Status.ACTIVE);
                             task.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
                             try {
                                 _storage.saveOneTask(task);
@@ -387,10 +385,10 @@ public class TaskTrigger implements Job {
 
                             // TODO check task if it exists longer than 7 days
                             if ((long)((task.getLunchtime() + ignore) * 1000L) > (new Date()).getTime()) {
-                                task.setStatus(BaseTask.Status.CHECKING);
+                                task.setStatus(TaskEntity.Status.CHECKING);
                                 tset.put(task.getTriggertime(), task);
                             } else {
-                                task.setStatus(BaseTask.Status.IGNORED);
+                                task.setStatus(TaskEntity.Status.IGNORED);
                             }
 
                             try {
@@ -402,10 +400,10 @@ public class TaskTrigger implements Job {
 
                         }
                     } else {                                    // stop delete...
-                        if (p.getStatus() == BaseProject.Status.DELETE) {
-                            task.setStatus(BaseTask.Status.DELETE);
+                        if (p.getStatus() == ProjectEntity.Status.DELETE) {
+                            task.setStatus(TaskEntity.Status.DELETE);
                         } else {
-                            task.setStatus(BaseTask.Status.STOP);
+                            task.setStatus(TaskEntity.Status.STOP);
                         }
                         task.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
                         task.setEndtime(((double) (new Date()).getTime()) / 1000.0);
@@ -418,7 +416,7 @@ public class TaskTrigger implements Job {
                         tset.pollFirstEntry();
                     }
                 } else {                                        // delete
-                    task.setStatus(BaseTask.Status.DELETE);
+                    task.setStatus(TaskEntity.Status.DELETE);
                     task.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
                     task.setEndtime(((double) (new Date()).getTime()) / 1000.0);
                     try {

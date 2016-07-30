@@ -1,63 +1,60 @@
-package com.traits.model;
+package com.traits.scheduler;
 
-import com.traits.db.RedisHandler;
+import com.traits.model.Configure;
+import com.traits.model.TaskEntity;
 import org.apache.log4j.Logger;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Created by YeFeng on 2016/7/20.
  */
-public class Workers {
-
-    private ThreadPoolExecutor threadPool;
-    private int POOL_SIZE = 4;
-
-    private final static Workers singleton = new Workers();
-
-    HashMap<BaseTask, Future<Integer>> futureList = new HashMap<BaseTask, Future<Integer>>();
-    HashSet<String> runningTasks = new HashSet<String>();
-
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+public class WorkersPool {
 
     static final Logger logger = Logger.getLogger("scheduler");
+    private final static WorkersPool singleton = new WorkersPool();
+    HashMap<TaskEntity, Future<Integer>> futureList = new HashMap<TaskEntity, Future<Integer>>();
+    HashSet<String> runningTasks = new HashSet<String>();
+    private ThreadPoolExecutor threadPool;
+    private int POOL_SIZE = 4;
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private Workers() {
+    private WorkersPool() {
         Configure conf = Configure.getSingleton();
         POOL_SIZE = conf.POOL_SIZE;
         threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(POOL_SIZE);
+    }
+
+    public static WorkersPool getSingleton() {
+        return singleton;
     }
 
     public int getWorkingCount() {
         return threadPool.getActiveCount();
     }
 
-    public boolean submitTask(BaseTask task) {
+    public boolean submitTask(TaskEntity task) {
         Future<Integer> future = threadPool.submit(task);
         futureList.put(task, future);
         runningTasks.add(task.getId().split("#")[0]);
         return true;
     }
 
-    public boolean removeTaskFromFutureList(BaseTask t) {
+    public boolean removeTaskFromFutureList(TaskEntity t) {
         futureList.remove(t);
         return true;
     }
 
-
-    public static Workers getSingleton() {
-        return singleton;
-    }
-
-    public HashMap<BaseTask, Future<Integer>> getFutureList() {
+    public HashMap<TaskEntity, Future<Integer>> getFutureList() {
         return futureList;
     }
 
-    public void setFutureList(HashMap<BaseTask, Future<Integer>> futureList) {
+    public void setFutureList(HashMap<TaskEntity, Future<Integer>> futureList) {
         this.futureList = futureList;
     }
 
