@@ -58,7 +58,7 @@ public class Configure {
         POOL_SIZE = Integer.valueOf(confProperties.getProperty("conf.worker.threadpool.size", "4"));
         maxActiveCount = Integer.valueOf(confProperties.getProperty("conf.worker.maxActiveCount", "4"));
 
-        String redisTmp = confProperties.getProperty("task.message.queue", "redis://127.0.0.1:6379/1");
+        String redisTmp = confProperties.getProperty("task.message.queue", "redis://127.0.0.1:6379/2");
         java.util.regex.Matcher mat = uriReg.matcher(redisTmp);
         if (mat.find()) {
             if (mat.group(1).equals("redis")) {

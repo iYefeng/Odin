@@ -25,10 +25,12 @@ public class PythonScript extends BaseExecutor{
         if (args != null) {
             JSONObject obj = JSON.parseObject(args);
             for (Object i : obj.keySet()) {
-                sb.append(String.format("%s=%s\n", (String) i, obj.getString((String) i).replace("\"", "\\\"")));
+                // TODO for windows replace("\"", "\\\"")
+                sb.append(String.format("%s=%s\n", (String) i, obj.getString((String) i)));
             }
         }
-        sb.append(script.replace("\"", "\\\""));
+        // TODO for windows replace("\"", "\\\"")
+        sb.append(script);
         logger.debug(sb.toString());
         String pys = sb.toString();
 

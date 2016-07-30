@@ -42,6 +42,7 @@ public class MySQLHandler {
         }
         p.put("useUnicode", "true");
         p.put("characterEncoding", "utf-8");
+        p.put("useSSL", "true");
         mDBConnection = DriverManager.getConnection(databaseUrl, p);
 
         mStatement = mDBConnection.createStatement();
