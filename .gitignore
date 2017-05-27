@@ -7,3 +7,7 @@
 result
 log
 scheduler/logs
+.DS_Store
+.settings
+.classpath
+.project
