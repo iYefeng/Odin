@@ -6,7 +6,9 @@
 */logs/
 result
 log
-scheduler/logs
+task_log
+work_space
+packages
 .DS_Store
 .settings
 .classpath

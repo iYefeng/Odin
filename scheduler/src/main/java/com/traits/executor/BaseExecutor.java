@@ -47,7 +47,7 @@ public class BaseExecutor extends Thread {
             String user = task.get_project().getUser();
             Configure conf = Configure.getSingleton();
 
-            String path = String.format("%slog/%s/tmp/%s/", conf.task_log_base_path, user, taskid);
+            String path = String.format("%stask_log/%s/tmp/%s/", conf.task_log_base_path, user, taskid);
             File dir = new File(path);
             if (!dir.exists()) {
                 dir.mkdirs();
