@@ -5,3 +5,5 @@
 *.iml
 */logs/
 result
+log
+scheduler/logs
