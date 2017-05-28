@@ -1,6 +1,9 @@
-package com.traits.scheduler;
+package com.traits.model.machine;
 
-import com.traits.model.ProjectEntity;
+import com.traits.model.entity.TaskDef;
+import com.traits.scheduler.ProjectExecutor;
+import com.traits.scheduler.ProjectScanner;
+import com.traits.scheduler.SysScheduler;
 import org.apache.log4j.Logger;
 import org.quartz.*;
 
@@ -17,7 +20,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 
 @DisallowConcurrentExecution
-public class ProjectTrigger implements Job {
+public class TaskRegister implements Job {
 
     static final Logger logger = Logger.getLogger("scheduler");
 
@@ -26,19 +29,19 @@ public class ProjectTrigger implements Job {
     Scheduler sched = SysScheduler.getScheduler();
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        logger.info(">> ProjectTrigger STARTING");
+        logger.info(">> TaskRegister STARTING");
         ProjectScanner _projectscanner = ProjectScanner.getInstance();
         boolean flag = _projectscanner.loadProjects();
         if (flag) {
-            Map<String, ProjectEntity> projectMap = _projectscanner.get_projectMap();
+            Map<String, TaskDef> projectMap = _projectscanner.get_projectMap();
 
-            for (Map.Entry<String, ProjectEntity> item : projectMap.entrySet()) {
-                ProjectEntity p = item.getValue();
-                if (p.get_sysStatus() == ProjectEntity.Status.ADDED) {
+            for (Map.Entry<String, TaskDef> item : projectMap.entrySet()) {
+                TaskDef p = item.getValue();
+                if (p.get_sysStatus() == TaskDef.Status.ADDED) {
 
                     try {
-                        if (p.getStatus() == ProjectEntity.Status.RUNNING
-                                || p.getStatus() == ProjectEntity.Status.DEBUG) {
+                        if (p.getStatus() == TaskDef.Status.RUNNING
+                                || p.getStatus() == TaskDef.Status.DEBUG) {
                             logger.debug("Add a running project");
                             JobDetail jobDetail = newJob(ProjectExecutor.class)
                                     .withIdentity(p.getId(), JOB_GROUP_NAME).build();
@@ -72,8 +75,8 @@ public class ProjectTrigger implements Job {
                         e.printStackTrace();
                     } //
 
-                    p.set_sysStatus(ProjectEntity.Status.DONE);
-                } else if (p.get_sysStatus() == ProjectEntity.Status.MODIFIED) {
+                    p.set_sysStatus(TaskDef.Status.DONE);
+                } else if (p.get_sysStatus() == TaskDef.Status.MODIFIED) {
 
                     try {
                         sched.pauseTrigger(new TriggerKey(p.getId(), TRIGGER_GROUP_NAME));
@@ -86,8 +89,8 @@ public class ProjectTrigger implements Job {
 
                     try {
                         // add new task
-                        if (p.getStatus() == ProjectEntity.Status.RUNNING
-                                || p.getStatus() == ProjectEntity.Status.DEBUG) {
+                        if (p.getStatus() == TaskDef.Status.RUNNING
+                                || p.getStatus() == TaskDef.Status.DEBUG) {
                             JobDetail jobDetail = newJob(ProjectExecutor.class)
                                     .withIdentity(p.getId(), JOB_GROUP_NAME).build();
                             jobDetail.getJobDataMap().put("currentProject", p);
@@ -118,8 +121,8 @@ public class ProjectTrigger implements Job {
                         e.printStackTrace();
                     }
 
-                    p.set_sysStatus(ProjectEntity.Status.DONE);
-                } else if (p.get_sysStatus() == ProjectEntity.Status.DELETE) {
+                    p.set_sysStatus(TaskDef.Status.DONE);
+                } else if (p.get_sysStatus() == TaskDef.Status.DELETE) {
                     try {
                         sched.pauseTrigger(new TriggerKey(p.getId(), TRIGGER_GROUP_NAME));
                         sched.unscheduleJob(new TriggerKey(p.getId(), TRIGGER_GROUP_NAME));
@@ -130,15 +133,15 @@ public class ProjectTrigger implements Job {
                         e.printStackTrace();
                     }
 
-                    p.setStatus(ProjectEntity.Status.DELETE);
-                    p.set_sysStatus(ProjectEntity.Status.DONE);
+                    p.setStatus(TaskDef.Status.DELETE);
+                    p.set_sysStatus(TaskDef.Status.DONE);
                 }
             }
 
 
         }
 
-        logger.info("<< ProjectTrigger STOPPED");
+        logger.info("<< TaskRegister STOPPED");
     }
 
 }

@@ -1,9 +1,9 @@
 package com.traits.db.dao;
 
-import com.traits.model.TaskEntity;
+import com.traits.model.entity.TaskDef;
+import com.traits.model.entity.TaskInst;
 import org.apache.commons.lang3.StringUtils;
 import com.traits.db.handler.MySQLHandler;
-import com.traits.model.ProjectEntity;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -36,42 +36,42 @@ public class MySQLDao extends BaseDao {
         handler.release();
     }
 
-    public ArrayList<ProjectEntity> getProjects() throws SQLException {
+    public ArrayList<TaskDef> getProjects() throws SQLException {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT * from `projectdb`");
-        return ProjectEntity.load(result, handler.getCurrentCount());
+        return TaskDef.load(result, handler.getCurrentCount());
     }
 
-    public ArrayList<ProjectEntity> getProjects(String[] fields) throws SQLException {
+    public ArrayList<TaskDef> getProjects(String[] fields) throws SQLException {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT %s from `projectdb`",
                 new String[]{StringUtils.join(fields, ", ")});
-        return ProjectEntity.load(result, handler.getCurrentCount());
+        return TaskDef.load(result, handler.getCurrentCount());
     }
 
-    public ProjectEntity getProjectById(String pid) throws SQLException {
+    public TaskDef getProjectById(String pid) throws SQLException {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT * from `projectdb` WHERE `id`='%s'",
                 new String[]{pid});
-        ArrayList<ProjectEntity> projects = ProjectEntity.load(result, handler.getCurrentCount());
-        return projects.size() == 0 ? null : projects.get(0);
+        ArrayList<TaskDef> taskDefs = TaskDef.load(result, handler.getCurrentCount());
+        return taskDefs.size() == 0 ? null : taskDefs.get(0);
     }
 
-    public boolean saveOneTask(TaskEntity task) throws SQLException {
-        boolean flag =  task.saveTask(handler);
+    public boolean saveOneTask(TaskInst taskInst) throws SQLException {
+        boolean flag =  taskInst.saveTask(handler);
         return flag;
     }
 
-    public ArrayList<TaskEntity> getInitTasks() throws Exception {
+    public ArrayList<TaskInst> getInitTasks() throws Exception {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT * from `taskdb` where `status`=0");
-        return TaskEntity.load(result, handler.getCurrentCount());
+        return TaskInst.load(result, handler.getCurrentCount());
     }
 
-    public ArrayList<TaskEntity> getCheckingTasks() throws Exception {
+    public ArrayList<TaskInst> getCheckingTasks() throws Exception {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT * from `taskdb` where `status`=7");
-        return TaskEntity.load(result, handler.getCurrentCount());
+        return TaskInst.load(result, handler.getCurrentCount());
     }
 
-    public ArrayList<TaskEntity> getActiveTasks() throws Exception {
+    public ArrayList<TaskInst> getActiveTasks() throws Exception {
         HashMap<String, ArrayList<Object>> result = handler.query("SELECT * from `taskdb` where `status`=1");
-        return TaskEntity.load(result, handler.getCurrentCount());
+        return TaskInst.load(result, handler.getCurrentCount());
     }
 
     public HashSet<String> getSuccessOrPassedTasks() throws Exception {
@@ -94,9 +94,9 @@ public class MySQLDao extends BaseDao {
 
     public static void main(String[] args) throws SQLException {
         MySQLDao ms = new MySQLDao("127.0.0.1", 3306, "scheduler", "dev", "123456");
-        ArrayList<ProjectEntity> projects = ms.getProjects();
+        ArrayList<TaskDef> taskDefs = ms.getProjects();
 
-        for (ProjectEntity i : projects) {
+        for (TaskDef i : taskDefs) {
             System.out.println(i.toString());
         }
 

@@ -1,6 +1,6 @@
 package com.traits.executor;
 
-import com.traits.model.TaskEntity;
+import com.traits.model.entity.TaskInst;
 import com.traits.model.Configure;
 import org.apache.log4j.Logger;
 
@@ -15,16 +15,16 @@ public class BaseExecutor extends Thread {
 
     InputStream is;
     String type;
-    TaskEntity task;
+    TaskInst taskInst;
 
-    public BaseExecutor(InputStream is, String type, TaskEntity task) {
+    public BaseExecutor(InputStream is, String type, TaskInst taskInst) {
         this.is = is;
         this.type = type;
-        this.task = task;
+        this.taskInst = taskInst;
     }
 
-    public BaseExecutor(TaskEntity task) {
-        this.task = task;
+    public BaseExecutor(TaskInst taskInst) {
+        this.taskInst = taskInst;
     }
 
     public BaseExecutor() {
@@ -43,8 +43,8 @@ public class BaseExecutor extends Thread {
             BufferedReader br = new BufferedReader(isr);
             String line = null;
 
-            String taskid = task.getId();
-            String user = task.get_project().getUser();
+            String taskid = taskInst.getId();
+            String user = taskInst.get_taskDef().getUser();
             Configure conf = Configure.getSingleton();
 
             String path = String.format("%stask_log/%s/tmp/%s/", conf.task_log_base_path, user, taskid);
@@ -56,13 +56,13 @@ public class BaseExecutor extends Thread {
 
             if (type.equals("stderr")) {
                 String tmp_path = path + "stderr.log";
-                task.setStderr_path(tmp_path);
+                taskInst.setStderr_path(tmp_path);
                 File tmp_file_dir = new File(tmp_path);
                 out = new FileOutputStream(tmp_file_dir);
                 buffer = new BufferedOutputStream(out);
             } else {
                 String tmp_path = path + "stdout.log";
-                task.setStdout_path(tmp_path);
+                taskInst.setStdout_path(tmp_path);
                 File tmp_file_dir = new File(tmp_path);
                 out = new FileOutputStream(tmp_file_dir);
                 buffer = new BufferedOutputStream(out);
@@ -89,17 +89,17 @@ public class BaseExecutor extends Thread {
     public int exec(String script, String args)
     {
         int status = 0;
-        System.out.println(String.format("\n*** Running task %s\n", task.getName()));
+        System.out.println(String.format("\n*** Running taskInst %s\n", taskInst.getName()));
         for (int i = 0; i < 5; ++i) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println(String.format("Sleeping Task %s", task.getName()));
+            System.out.println(String.format("Sleeping TaskInst %s", taskInst.getName()));
         }
 
-        System.out.println(String.format("\nRunning task %s\n", task.getName()));
+        System.out.println(String.format("\nRunning taskInst %s\n", taskInst.getName()));
         return status;
     }
 

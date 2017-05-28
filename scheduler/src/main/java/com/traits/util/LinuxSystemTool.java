@@ -77,6 +77,10 @@ public final class LinuxSystemTool {
                 (user1 + nice1 + sys1 + idle1));
     }
 
+    /*
+     *　获取磁盘使用率
+     * return: float
+     */
     public static float getIOInfo() throws IOException {
         float ioUsage = 0.0f;
         Process pro = null;
@@ -104,6 +108,10 @@ public final class LinuxSystemTool {
         return ioUsage;
     }
 
+    /*
+     * 获取无网络流量
+     * return: float   Mbps
+     */
     public static float getNetInfo() throws IOException, InterruptedException {
 
         float netUsage = 0.0f;

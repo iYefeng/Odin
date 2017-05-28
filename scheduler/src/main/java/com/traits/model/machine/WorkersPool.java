@@ -1,7 +1,7 @@
 package com.traits.model.machine;
 
 import com.traits.model.Configure;
-import com.traits.model.TaskEntity;
+import com.traits.model.entity.TaskInst;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
@@ -18,7 +18,7 @@ public class WorkersPool {
 
     static final Logger logger = Logger.getLogger("scheduler");
     private final static WorkersPool singleton = new WorkersPool();
-    HashMap<TaskEntity, Future<Integer>> futureList = new HashMap<TaskEntity, Future<Integer>>();
+    HashMap<TaskInst, Future<Integer>> futureList = new HashMap<TaskInst, Future<Integer>>();
     HashSet<String> runningTasks = new HashSet<String>();
     private ThreadPoolExecutor threadPool;
     private int POOL_SIZE = 4;
@@ -38,23 +38,23 @@ public class WorkersPool {
         return threadPool.getActiveCount();
     }
 
-    public boolean submitTask(TaskEntity task) {
-        Future<Integer> future = threadPool.submit(task);
-        futureList.put(task, future);
-        runningTasks.add(task.getId().split("#")[0]);
+    public boolean submitTask(TaskInst taskInst) {
+        Future<Integer> future = threadPool.submit(taskInst);
+        futureList.put(taskInst, future);
+        runningTasks.add(taskInst.getId().split("#")[0]);
         return true;
     }
 
-    public boolean removeTaskFromFutureList(TaskEntity t) {
+    public boolean removeTaskFromFutureList(TaskInst t) {
         futureList.remove(t);
         return true;
     }
 
-    public HashMap<TaskEntity, Future<Integer>> getFutureList() {
+    public HashMap<TaskInst, Future<Integer>> getFutureList() {
         return futureList;
     }
 
-    public void setFutureList(HashMap<TaskEntity, Future<Integer>> futureList) {
+    public void setFutureList(HashMap<TaskInst, Future<Integer>> futureList) {
         this.futureList = futureList;
     }
 

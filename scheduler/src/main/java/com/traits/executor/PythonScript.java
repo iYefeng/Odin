@@ -2,7 +2,7 @@ package com.traits.executor;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.traits.model.TaskEntity;
+import com.traits.model.entity.TaskInst;
 
 import java.io.IOException;
 
@@ -11,8 +11,8 @@ import java.io.IOException;
  */
 public class PythonScript extends BaseExecutor{
 
-    public PythonScript(TaskEntity task) {
-        this.task = task;
+    public PythonScript(TaskInst taskInst) {
+        this.taskInst = taskInst;
     }
 
     public int exec(String script, String args)
@@ -26,7 +26,7 @@ public class PythonScript extends BaseExecutor{
             JSONObject obj = JSON.parseObject(args);
             for (Object i : obj.keySet()) {
                 // TODO for windows replace("\"", "\\\"")
-                sb.append(String.format("%s=%s\n", (String) i, obj.getString((String) i)));
+                sb.append(String.format("%s=%s\n", i, obj.getString((String) i)));
             }
         }
         // TODO for windows replace("\"", "\\\"")
@@ -43,8 +43,8 @@ public class PythonScript extends BaseExecutor{
         try
         {
             process = Runtime.getRuntime().exec(cmds);
-            BaseExecutor error = new BaseExecutor(process.getErrorStream(), "stderr", task);
-            BaseExecutor output = new BaseExecutor(process.getInputStream(), "stdout", task);
+            BaseExecutor error = new BaseExecutor(process.getErrorStream(), "stderr", taskInst);
+            BaseExecutor output = new BaseExecutor(process.getInputStream(), "stdout", taskInst);
             error.start();
             output.start();
             try

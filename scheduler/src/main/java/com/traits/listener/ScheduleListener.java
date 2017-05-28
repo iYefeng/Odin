@@ -1,5 +1,6 @@
-package com.traits.scheduler;
+package com.traits.listener;
 
+import com.traits.scheduler.SysScheduler;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -9,7 +10,7 @@ import javax.servlet.ServletContextListener;
 /**
  * Created by YeFeng on 2016/5/17.
  */
-public class ScheduleLoader implements ServletContextListener {
+public class ScheduleListener implements ServletContextListener {
 
     static final Logger logger = Logger.getLogger("scheduler");
     private SysScheduler _sysScheduler;

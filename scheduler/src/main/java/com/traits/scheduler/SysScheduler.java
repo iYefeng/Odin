@@ -1,6 +1,8 @@
 package com.traits.scheduler;
 
 
+import com.traits.model.machine.JobGuard;
+import com.traits.model.machine.TaskRegister;
 import org.apache.log4j.Logger;
 import org.quartz.*;
 
@@ -37,7 +39,7 @@ public class SysScheduler {
 
         schedFact = new org.quartz.impl.StdSchedulerFactory();
         sched = schedFact.getScheduler();
-        //Scheduler sched = StdSchedulerFactory.getDefaultScheduler();
+        //JobScheduler sched = StdSchedulerFactory.getDefaultScheduler();
 
     }
 
@@ -49,7 +51,7 @@ public class SysScheduler {
             if (schedulerType.contains("projectTrigger")) {
                 logger.info("run as projectTrigger");
                 // define the job and tie it to our HelloJob class
-                JobDetail job = newJob(ProjectTrigger.class)
+                JobDetail job = newJob(TaskRegister.class)
                         .withIdentity("SystemJob", "projectTrigger")
                         .build();
                 // Trigger the job to run now, and then every 40 seconds
@@ -67,11 +69,11 @@ public class SysScheduler {
             if (schedulerType.contains("taskTrigger")) {
                 logger.info("run as taskTrigger");
 
-                TaskTrigger tt = new TaskTrigger();
+                JobGuard tt = new JobGuard();
                 tt.initLoad();
 
                 // define the job and tie it to our HelloJob class
-                JobDetail job = newJob(TaskTrigger.class)
+                JobDetail job = newJob(JobGuard.class)
                         .withIdentity("SystemJob", "taskTrigger")
                         .build();
                 // Trigger the job to run now, and then every 40 seconds

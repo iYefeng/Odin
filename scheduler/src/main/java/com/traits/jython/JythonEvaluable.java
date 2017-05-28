@@ -71,7 +71,7 @@ public class JythonEvaluable {
     public Object evaluate() {
         try {
             // call the temporary PyFunction directly
-            Object result = ((PyFunction) _engine.get(s_functionName)).__call__();
+            Object result = _engine.get(s_functionName).__call__();
 
             return unwrap(result);
         } catch (PyException e) {
@@ -118,13 +118,13 @@ public class JythonEvaluable {
         if (po instanceof PyNone) {
             return null;
         } else if (po.getType().getName().equals("int")) {
-            return ((PyInteger) po).asInt();
+            return po.asInt();
         } else if (po.getType().getName().equals("long")) {
-            return ((PyLong) po).asLong();
+            return po.asLong();
         }else if (po.getType().getName().equals("float")) {
-            return ((PyFloat) po).asDouble();
+            return po.asDouble();
         } else if (po.getType().getName().equals("str")) {
-            return ((PyString) po).asString();
+            return po.asString();
         } else if (po.isSequenceType()) {
             Iterator<PyObject> i = po.asIterable().iterator();
 

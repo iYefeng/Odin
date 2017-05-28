@@ -1,6 +1,6 @@
 package com.traits.scheduler;
 
-import com.traits.model.ProjectEntity;
+import com.traits.model.entity.TaskDef;
 import com.traits.model.Configure;
 import com.traits.db.dao.BaseDao;
 import com.traits.db.dao.MongoDBDao;
@@ -21,7 +21,7 @@ public class ProjectScanner {
     private int port;
     static final Logger logger = Logger.getLogger("scheduler");
 
-    private Map<String, ProjectEntity> _projectMap = new HashMap<String, ProjectEntity>();
+    private Map<String, TaskDef> _projectMap = new HashMap<String, TaskDef>();
 
 
     private ProjectScanner() {
@@ -51,25 +51,25 @@ public class ProjectScanner {
                 _storage = new MySQLDao(host, port, database, user, passwd);
             }
 
-            for (Map.Entry<String, ProjectEntity> p: _projectMap.entrySet()) {  //// set project to delete
-                p.getValue().set_sysStatus(ProjectEntity.Status.DELETE);
+            for (Map.Entry<String, TaskDef> p: _projectMap.entrySet()) {  //// set project to delete
+                p.getValue().set_sysStatus(TaskDef.Status.DELETE);
             }
 
-            ArrayList<ProjectEntity> projects_tmp = _storage.getProjects();
-            for (ProjectEntity tmp : projects_tmp) {
+            ArrayList<TaskDef> projects_tmp = _storage.getProjects();
+            for (TaskDef tmp : projects_tmp) {
                 String projectId = tmp.getId();
                 if (_projectMap.containsKey(projectId)) {                    ///// for old project
-                    ProjectEntity sysProject = _projectMap.get(projectId);
-                    if (sysProject.getUpdatetime() < tmp.getUpdatetime()) {  // modified project
-                        sysProject.copy(tmp);
-                        sysProject.set_sysStatus(ProjectEntity.Status.MODIFIED);
+                    TaskDef sysTaskDef = _projectMap.get(projectId);
+                    if (sysTaskDef.getUpdatetime() < tmp.getUpdatetime()) {  // modified project
+                        sysTaskDef.copy(tmp);
+                        sysTaskDef.set_sysStatus(TaskDef.Status.MODIFIED);
                     } else {                                                 // unmodified project
-                        sysProject.set_sysStatus(ProjectEntity.Status.DONE);
+                        sysTaskDef.set_sysStatus(TaskDef.Status.DONE);
                     }
                 } else {                                                     ///// for new project
-                    ProjectEntity newproject = new ProjectEntity();
+                    TaskDef newproject = new TaskDef();
                     newproject.copy(tmp);
-                    newproject.set_sysStatus(ProjectEntity.Status.ADDED);
+                    newproject.set_sysStatus(TaskDef.Status.ADDED);
                     _projectMap.put(newproject.getId(), newproject);
                 }
             }
@@ -84,7 +84,7 @@ public class ProjectScanner {
         return true;
     }
 
-    public Map<String, ProjectEntity> get_projectMap() {
+    public Map<String, TaskDef> get_projectMap() {
         return _projectMap;
     }
 

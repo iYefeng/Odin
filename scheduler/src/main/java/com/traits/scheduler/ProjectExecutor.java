@@ -1,8 +1,8 @@
 package com.traits.scheduler;
 
 import com.traits.jython.JythonEvaluable;
-import com.traits.model.ProjectEntity;
-import com.traits.model.TaskEntity;
+import com.traits.model.entity.TaskDef;
+import com.traits.model.entity.TaskInst;
 import com.traits.model.Configure;
 import com.traits.db.dao.BaseDao;
 import com.traits.db.dao.MongoDBDao;
@@ -27,7 +27,7 @@ import java.util.HashMap;
 public class ProjectExecutor implements Job {
 
     static final Logger logger = Logger.getLogger("scheduler");
-    private ProjectEntity project;
+    private TaskDef taskDef;
     private String dbtype, host, database, table, user, passwd;
     private int port;
 
@@ -49,15 +49,15 @@ public class ProjectExecutor implements Job {
         BaseDao _storage = null;
 
         JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
-        this.project = (ProjectEntity) jobDataMap.get("currentProject");
+        this.taskDef = (TaskDef) jobDataMap.get("currentProject");
 
-        logger.debug("running project Id: " + project.getId());
-        TaskEntity task = new TaskEntity();
+        logger.debug("running taskDef Id: " + taskDef.getId());
+        TaskInst taskInst = new TaskInst();
 
         Date starttime = new Date();
         Date lunchTime;
-        if (project.getCron() != null) {
-            ArrayList<Date> t = project.getCron().getTimeBefore(new Date(context.getFireTime().getTime() + 1), 1);
+        if (taskDef.getCron() != null) {
+            ArrayList<Date> t = taskDef.getCron().getTimeBefore(new Date(context.getFireTime().getTime() + 1), 1);
             if (t != null) {
                 lunchTime = t.get(0);
             } else {
@@ -68,13 +68,13 @@ public class ProjectExecutor implements Job {
             lunchTime = context.getFireTime();
         }
 
-        String taskName = String.format("%s @ %s", project.getId(), df.format(lunchTime));
+        String taskName = String.format("%s @ %s", taskDef.getId(), df.format(lunchTime));
 
 
 
         HashMap<String, Object> args = null;
 
-        String script = project.getArgs_script();
+        String script = taskDef.getArgs_script();
         logger.debug(">> jpython:" + script);
         if (script != null && !script.equals("")) {
             logger.debug(script);
@@ -107,19 +107,19 @@ public class ProjectExecutor implements Job {
             e.printStackTrace();
         }
 
-        for (int j = 0; j < project.getNum_workers(); ++j) {
+        for (int j = 0; j < taskDef.getNum_workers(); ++j) {
             String taskId = DigestUtils.md5Hex(taskName) + "#" + String.valueOf(j);
-            task.setId(taskId);
-            task.setProject_id(project.getId());
-            task.setName(taskName);
-            task.setLunchtime(((double) lunchTime.getTime()) / 1000.0);
-            task.setStarttime(((double) starttime.getTime()) / 1000.0);
-            task.setStatus(TaskEntity.Status.INIT);
-            task.setArgs(argsJsonStr);
-            task.setUpdatetime(((double) starttime.getTime()) / 1000.0);
+            taskInst.setId(taskId);
+            taskInst.setProject_id(taskDef.getId());
+            taskInst.setName(taskName);
+            taskInst.setLunchtime(((double) lunchTime.getTime()) / 1000.0);
+            taskInst.setStarttime(((double) starttime.getTime()) / 1000.0);
+            taskInst.setStatus(TaskInst.Status.INIT);
+            taskInst.setArgs(argsJsonStr);
+            taskInst.setUpdatetime(((double) starttime.getTime()) / 1000.0);
             if (_storage != null) {
                 try {
-                    _storage.saveOneTask(task);
+                    _storage.saveOneTask(taskInst);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

@@ -1,3 +1,5 @@
+import com.traits.model.machine.Monitor;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,13 +11,17 @@ public class Test {
     private static Pattern depReg = Pattern.compile("(day|hour|minute|second)\\((0|-\\d+)\\)((-|\\+)\\d+)*,\\s*(\\d+)");
 
     public static void main(String[] args) {
-        Matcher mat = depReg.matcher("day(-3), 12");
+//        Matcher mat = depReg.matcher("day(-3), 12");
+//
+//        if (mat.find()) {
+//            System.out.println(mat.group(1));
+//            System.out.println(mat.group(2));
+//            System.out.println(mat.group(3));
+//            System.out.println(mat.group(5));
+//        }
+        Monitor monitor = Monitor.getInstance();
+        Thread thread = new Thread(monitor);
+        thread.start();
 
-        if (mat.find()) {
-            System.out.println(mat.group(1));
-            System.out.println(mat.group(2));
-            System.out.println(mat.group(3));
-            System.out.println(mat.group(5));
-        }
     }
 }

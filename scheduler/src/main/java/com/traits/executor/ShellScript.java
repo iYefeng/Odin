@@ -2,7 +2,7 @@ package com.traits.executor;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.traits.model.TaskEntity;
+import com.traits.model.entity.TaskInst;
 
 import java.io.IOException;
 
@@ -11,8 +11,8 @@ import java.io.IOException;
  */
 public class ShellScript extends BaseExecutor {
 
-    public ShellScript(TaskEntity task) {
-        this.task = task;
+    public ShellScript(TaskInst taskInst) {
+        this.taskInst = taskInst;
     }
 
     public int exec(String script, String args)
@@ -24,7 +24,7 @@ public class ShellScript extends BaseExecutor {
         if (args != null) {
             JSONObject obj = JSON.parseObject(args);
             for (Object i : obj.keySet()) {
-                sb.append(String.format("%s='%s'\n", (String) i, obj.getString((String) i)).replace("\"", "\\\""));
+                sb.append(String.format("%s='%s'\n", i, obj.getString((String) i)).replace("\"", "\\\""));
             }
         }
         sb.append(script);
@@ -37,8 +37,8 @@ public class ShellScript extends BaseExecutor {
         try
         {
             process = Runtime.getRuntime().exec(cmds);
-            BaseExecutor error = new BaseExecutor(process.getErrorStream(), "stderr", task);
-            BaseExecutor output = new BaseExecutor(process.getInputStream(), "stdout", task);
+            BaseExecutor error = new BaseExecutor(process.getErrorStream(), "stderr", taskInst);
+            BaseExecutor output = new BaseExecutor(process.getInputStream(), "stdout", taskInst);
             error.start();
             output.start();
             try

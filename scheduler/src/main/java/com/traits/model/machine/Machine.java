@@ -8,14 +8,19 @@ import com.traits.model.Configure;
 abstract public class Machine {
 
     protected Configure conf = null;
+    protected Monitor monitor = null;
 
     public Machine(Configure conf) {
         this.conf = conf;
+        this.monitor = Monitor.getInstance();
+        this.monitor.start();
     }
 
-     void monitor() {}
-     void init() {}
-     void start() {}
-     void stop() {}
-     void destory() {}
+    void init() {}
+    void start() {}
+    void stop() {}
+
+    void destory() {
+        this.monitor.stop();
+    }
 }

@@ -33,9 +33,13 @@ public class Configure {
 
 
     private Configure() {
+        System.out.println(this.getClass()
+                .getClassLoader()
+                .getResource("./")
+                .getPath());
         String configPath = this.getClass()
                 .getClassLoader()
-                .getResource("/")
+                .getResource("./")
                 .getPath() + "conf.properties";
         Properties confProperties = new Properties();
         try {
@@ -76,4 +80,7 @@ public class Configure {
         return singleton;
     }
 
+    public static void main(String args[]) {
+        Configure conf = Configure.getSingleton();
+    }
 }

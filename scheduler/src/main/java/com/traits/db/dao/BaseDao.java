@@ -1,7 +1,7 @@
 package com.traits.db.dao;
 
-import com.traits.model.ProjectEntity;
-import com.traits.model.TaskEntity;
+import com.traits.model.entity.TaskDef;
+import com.traits.model.entity.TaskInst;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -17,35 +17,35 @@ public class BaseDao {
 
     public BaseDao(String host, int port, String database, String user, String passwd) {}
 
-    public ArrayList<ProjectEntity> getProjects() throws Exception {
-        return new ArrayList<ProjectEntity>();
+    public ArrayList<TaskDef> getProjects() throws Exception {
+        return new ArrayList<TaskDef>();
     }
 
-    public ArrayList<ProjectEntity> getProjects(String[] fields) throws SQLException {
-        return new ArrayList<ProjectEntity>();
+    public ArrayList<TaskDef> getProjects(String[] fields) throws SQLException {
+        return new ArrayList<TaskDef>();
     }
 
-    public ProjectEntity getProjectById(String pid) throws SQLException {
-        return new ProjectEntity();
+    public TaskDef getProjectById(String pid) throws SQLException {
+        return new TaskDef();
     }
 
-    public ArrayList<TaskEntity> getInitTasks() throws Exception {
-        return new ArrayList<TaskEntity>();
+    public ArrayList<TaskInst> getInitTasks() throws Exception {
+        return new ArrayList<TaskInst>();
     }
 
-    public ArrayList<TaskEntity> getCheckingTasks() throws Exception {
-        return new ArrayList<TaskEntity>();
+    public ArrayList<TaskInst> getCheckingTasks() throws Exception {
+        return new ArrayList<TaskInst>();
     }
 
-    public ArrayList<TaskEntity> getActiveTasks() throws Exception {
-        return new ArrayList<TaskEntity>();
+    public ArrayList<TaskInst> getActiveTasks() throws Exception {
+        return new ArrayList<TaskInst>();
     }
 
     public HashSet<String> getSuccessOrPassedTasks() throws Exception {
         return new HashSet<String>();
     }
 
-    public boolean saveOneTask(TaskEntity task) throws Exception {
+    public boolean saveOneTask(TaskInst taskInst) throws Exception {
         return false;
     }
 

@@ -1,4 +1,4 @@
-package com.traits.model;
+package com.traits.model.entity;
 
 import com.traits.db.handler.MySQLHandler;
 import com.traits.executor.BaseExecutor;
@@ -37,22 +37,22 @@ import java.util.concurrent.Callable;
  KEY `idx_lunchtime` (`lunchtime`)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
  */
-public class TaskEntity implements Callable<Integer>, Serializable {
+public class TaskInst implements Callable<Integer>, Serializable {
 
     static final Logger logger = Logger.getLogger("scheduler");
 
     public Integer call() throws Exception {
         int status = -1;
         BaseExecutor eval = null;
-        if (get_project().getType() == ProjectEntity.Type.SHELLSCRIPT) {
+        if (get_taskDef().getType() == TaskDef.Type.SHELLSCRIPT) {
             eval = new ShellScript(this);
-        } else if (get_project().getType() == ProjectEntity.Type.PYTHONSCRIPT) {
+        } else if (get_taskDef().getType() == TaskDef.Type.PYTHONSCRIPT) {
             eval = new PythonScript(this);
         } else {
             eval = new BaseExecutor(this);
         }
 
-        status = eval.exec(get_project().getScript(), getArgs());
+        status = eval.exec(get_taskDef().getScript(), getArgs());
         return status;
     }
 
@@ -64,7 +64,7 @@ public class TaskEntity implements Callable<Integer>, Serializable {
 
         private int value = 0;
 
-        private Status(int value) {    //    必须是private的，否则编译错误
+        Status(int value) {    //    必须是private的，否则编译错误
             this.value = value;
         }
 
@@ -118,7 +118,7 @@ public class TaskEntity implements Callable<Integer>, Serializable {
     private Integer retry_count;
     private String working_node;
 
-    private ProjectEntity _project;
+    private TaskDef _taskDef;
 
     public Date transTimestamp(Double ts) {
         Long _timestamp;
@@ -176,18 +176,18 @@ public class TaskEntity implements Callable<Integer>, Serializable {
         return  handler.executeMany(SQL, dataList);
     }
 
-    public static ArrayList<TaskEntity> load(HashMap<String, ArrayList<Object>> map, int count) {
-        ArrayList<TaskEntity> tasks = new ArrayList<TaskEntity>();
+    public static ArrayList<TaskInst> load(HashMap<String, ArrayList<Object>> map, int count) {
+        ArrayList<TaskInst> taskInsts = new ArrayList<TaskInst>();
 
         for (int i = 0; i < count; ++i) {
-            TaskEntity tmp = new TaskEntity();
+            TaskInst tmp = new TaskInst();
             for (String key : map.keySet()) {
                 Object obj = map.get(key).get(i);
                 tmp.setKeyValue(key, obj);
             }
-            tasks.add(tmp);
+            taskInsts.add(tmp);
         }
-        return tasks;
+        return taskInsts;
     }
 
     public String toString() {
@@ -351,12 +351,12 @@ public class TaskEntity implements Callable<Integer>, Serializable {
         this.retry_count = retry_count;
     }
 
-    public ProjectEntity get_project() {
-        return _project;
+    public TaskDef get_taskDef() {
+        return _taskDef;
     }
 
-    public void set_project(ProjectEntity _project) {
-        this._project = _project;
+    public void set_taskDef(TaskDef _taskDef) {
+        this._taskDef = _taskDef;
     }
 
     public String getWorking_node() {

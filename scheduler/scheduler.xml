@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="scheduler" default="all">
+<taskDef name="scheduler" default="all">
   
   
   <property file="scheduler.properties"/>
@@ -84,12 +84,12 @@
     </fileset>
   </path>
   
-  <property name="project.jdk.home" value="${jdk.home.1.7}"/>
-  <property name="project.jdk.bin" value="${jdk.bin.1.7}"/>
-  <property name="project.jdk.classpath" value="jdk.classpath.1.7"/>
+  <property name="taskDef.jdk.home" value="${jdk.home.1.7}"/>
+  <property name="taskDef.jdk.bin" value="${jdk.bin.1.7}"/>
+  <property name="taskDef.jdk.classpath" value="jdk.classpath.1.7"/>
   
   
-  <!-- Project Libraries -->
+  <TaskDefject Libraries -->
   
   <path id="library.maven:_asm:asm-commons:3.3.classpath">
     <pathelement location="${path.variable.maven_repository}/asm/asm-commons/3.3/asm-commons-3.3.jar"/>
@@ -249,4 +249,4 @@
   <target name="build.modules" depends="init, clean, compile.module.scheduler, compile.module.server" description="build all modules"/>
   
   <target name="all" depends="build.modules" description="build all"/>
-</project>
+</taskDef>

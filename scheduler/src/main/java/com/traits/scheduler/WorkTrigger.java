@@ -5,6 +5,8 @@ import com.traits.model.*;
 import com.traits.db.dao.BaseDao;
 import com.traits.db.dao.MongoDBDao;
 import com.traits.db.dao.MySQLDao;
+import com.traits.model.entity.TaskDef;
+import com.traits.model.entity.TaskInst;
 import com.traits.model.machine.WorkersPool;
 import com.traits.util.SerializeUtil;
 import org.apache.log4j.Logger;
@@ -62,7 +64,7 @@ public class WorkTrigger implements Job {
         logger.info(">> WorkTrigger execute");
 
         BaseDao _storage = null;
-        ProjectEntity project = null;
+        TaskDef taskDef = null;
 
         try {
             if (dbtype.equals("mysql")) {
@@ -82,31 +84,31 @@ public class WorkTrigger implements Job {
 
             WorkersPool _workers = WorkersPool.getSingleton();
 
-            Iterator<Map.Entry<TaskEntity, Future<Integer>>> it = _workers.getFutureList().entrySet().iterator();
+            Iterator<Map.Entry<TaskInst, Future<Integer>>> it = _workers.getFutureList().entrySet().iterator();
             while (it.hasNext()) {
-                Map.Entry<TaskEntity, Future<Integer>> kvTask = it.next();
-                TaskEntity task = kvTask.getKey();
+                Map.Entry<TaskInst, Future<Integer>> kvTask = it.next();
+                TaskInst taskInst = kvTask.getKey();
                 Future<Integer> future = kvTask.getValue();
                 if (future.isDone())  {
-                    task.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
+                    taskInst.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
 
                     try {
                         if (future.get() == 0) {
-                            task.setEndtime(((double) (new Date()).getTime()) / 1000.0);
-                            task.setStatus(TaskEntity.Status.SUCCESS);
+                            taskInst.setEndtime(((double) (new Date()).getTime()) / 1000.0);
+                            taskInst.setStatus(TaskInst.Status.SUCCESS);
                         } else {
-                            if (task.getRetry_count() >= task.get_project().getRetry()) {
-                                task.setEndtime(((double) (new Date()).getTime()) / 1000.0);
-                                task.setStatus(TaskEntity.Status.FAIL);
+                            if (taskInst.getRetry_count() >= taskInst.get_taskDef().getRetry()) {
+                                taskInst.setEndtime(((double) (new Date()).getTime()) / 1000.0);
+                                taskInst.setStatus(TaskInst.Status.FAIL);
                             } else {
-                                logger.debug("Retry this task");
-                                task.setStatus(TaskEntity.Status.ACTIVE);
-                                task.setRetry_count(task.getRetry_count() + 1);
-                                task.set_project(null);
+                                logger.debug("Retry this taskInst");
+                                taskInst.setStatus(TaskInst.Status.ACTIVE);
+                                taskInst.setRetry_count(taskInst.getRetry_count() + 1);
+                                taskInst.set_taskDef(null);
                                 // push to redis
                                 redis_handler.getHandler().rpush(
-                                        "scheduler.task.queue".getBytes(),
-                                        SerializeUtil.serialize(task));
+                                        "scheduler.taskInst.queue".getBytes(),
+                                        SerializeUtil.serialize(taskInst));
                             }
 
                         }
@@ -119,15 +121,15 @@ public class WorkTrigger implements Job {
                     }
 
                     it.remove();
-                    _workers.getRunningTasks().remove(task.getId().split("#")[0]);
+                    _workers.getRunningTasks().remove(taskInst.getId().split("#")[0]);
                 } else if (future.isCancelled()) {
-                    task.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
-                    task.setEndtime(((double) (new Date()).getTime()) / 1000.0);
-                    task.setStatus(TaskEntity.Status.DELETE);
+                    taskInst.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
+                    taskInst.setEndtime(((double) (new Date()).getTime()) / 1000.0);
+                    taskInst.setStatus(TaskInst.Status.DELETE);
                     it.remove();
-                    _workers.getRunningTasks().remove(task.getId().split("#")[0]);
+                    _workers.getRunningTasks().remove(taskInst.getId().split("#")[0]);
                 } else {
-                    task.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
+                    taskInst.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
                 }
 
                 try {
@@ -145,32 +147,32 @@ public class WorkTrigger implements Job {
             }
 
 
-            byte[] task_s = redis_handler.getHandler().lpop("scheduler.task.queue".getBytes());
+            byte[] task_s = redis_handler.getHandler().lpop("scheduler.taskInst.queue".getBytes());
             if (task_s == null) return;
-            TaskEntity task = (TaskEntity) SerializeUtil.unserialize(task_s);
-            if (task == null) return;
+            TaskInst taskInst = (TaskInst) SerializeUtil.unserialize(task_s);
+            if (taskInst == null) return;
 
-            if (_workers.getRunningTasks().contains(task.getId().split("#")[0])) {
+            if (_workers.getRunningTasks().contains(taskInst.getId().split("#")[0])) {
                 redis_handler.getHandler().rpush(
-                        "scheduler.task.queue".getBytes(),
-                        SerializeUtil.serialize(task));
+                        "scheduler.taskInst.queue".getBytes(),
+                        SerializeUtil.serialize(taskInst));
                 return;
             }
 
-            task.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
+            taskInst.setUpdatetime(((double) (new Date()).getTime()) / 1000.0);
 
             try {
-                project = _storage.getProjectById(task.getProject_id());
+                taskDef = _storage.getProjectById(taskInst.getProject_id());
             } catch (SQLException e) {
-                logger.error("get project error");
+                logger.error("get taskDef error");
                 e.printStackTrace();
             }
 
-            if (project == null) {
-                logger.info("project is not found");
-                task.setStatus(TaskEntity.Status.DELETE);
+            if (taskDef == null) {
+                logger.info("taskDef is not found");
+                taskInst.setStatus(TaskInst.Status.DELETE);
                 try {
-                    _storage.saveOneTask(task);
+                    _storage.saveOneTask(taskInst);
                 } catch (Exception e) {
                     logger.error(e.getMessage());
                     e.printStackTrace();
@@ -178,33 +180,33 @@ public class WorkTrigger implements Job {
                 return;
             }
 
-            if (project.getStatus() == ProjectEntity.Status.RUNNING
-                    || project.getStatus() == ProjectEntity.Status.DEBUG) {
-                // run task
-                task.setStatus(TaskEntity.Status.RUNNING);
+            if (taskDef.getStatus() == TaskDef.Status.RUNNING
+                    || taskDef.getStatus() == TaskDef.Status.DEBUG) {
+                // run taskInst
+                taskInst.setStatus(TaskInst.Status.RUNNING);
                 try {
-                    _storage.saveOneTask(task);
+                    _storage.saveOneTask(taskInst);
                 } catch (Exception e) {
-                    logger.error("save task error");
+                    logger.error("save taskInst error");
                     e.printStackTrace();
                 }
-                task.set_project(project);
-                _workers.submitTask(task);
-            } else if (project.getStatus() == ProjectEntity.Status.DELETE) {
+                taskInst.set_taskDef(taskDef);
+                _workers.submitTask(taskInst);
+            } else if (taskDef.getStatus() == TaskDef.Status.DELETE) {
                 // pass
-                task.setStatus(TaskEntity.Status.DELETE);
+                taskInst.setStatus(TaskInst.Status.DELETE);
                 try {
-                    _storage.saveOneTask(task);
+                    _storage.saveOneTask(taskInst);
                 } catch (Exception e) {
-                    logger.error("save task error");
+                    logger.error("save taskInst error");
                     e.printStackTrace();
                 }
             } else {
-                task.setStatus(TaskEntity.Status.STOP);
+                taskInst.setStatus(TaskInst.Status.STOP);
                 try {
-                    _storage.saveOneTask(task);
+                    _storage.saveOneTask(taskInst);
                 } catch (Exception e) {
-                    logger.error("save task error");
+                    logger.error("save taskInst error");
                     e.printStackTrace();
                 }
             }

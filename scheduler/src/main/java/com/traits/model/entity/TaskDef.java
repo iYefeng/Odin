@@ -1,4 +1,4 @@
-package com.traits.model;
+package com.traits.model.entity;
 
 import com.traits.util.Crontab;
 import org.apache.log4j.Logger;
@@ -39,7 +39,7 @@ import java.util.HashMap;
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8
  *
  */
-public class ProjectEntity implements Serializable {
+public class TaskDef implements Serializable {
 
     static final Logger logger = Logger.getLogger("scheduler");
 
@@ -49,7 +49,7 @@ public class ProjectEntity implements Serializable {
 
         private int value = 0;
 
-        private Status(int value) {    //    必须是private的，否则编译错误
+        Status(int value) {    //    必须是private的，否则编译错误
             this.value = value;
         }
 
@@ -86,7 +86,7 @@ public class ProjectEntity implements Serializable {
 
         private int value;
 
-        private Type(int value) {
+        Type(int value) {
             this.value = value;
         }
 
@@ -132,22 +132,22 @@ public class ProjectEntity implements Serializable {
 
     private Status _sysStatus;
 
-    public static ArrayList<ProjectEntity> load(HashMap<String, ArrayList<Object>> map, int count) {
-        ArrayList<ProjectEntity> projects = new ArrayList<ProjectEntity>();
+    public static ArrayList<TaskDef> load(HashMap<String, ArrayList<Object>> map, int count) {
+        ArrayList<TaskDef> taskDefs = new ArrayList<TaskDef>();
 
         for (int i = 0; i < count; ++i) {
-            ProjectEntity tmp = new ProjectEntity();
+            TaskDef tmp = new TaskDef();
             for (String key : map.keySet()) {
                 Object obj = map.get(key).get(i);
                 tmp.setKeyValue(key, obj);
             }
-            projects.add(tmp);
+            taskDefs.add(tmp);
         }
 
-        return projects;
+        return taskDefs;
     }
 
-    public void copy(ProjectEntity other) {
+    public void copy(TaskDef other) {
         if (this.id == null) {
             this.id = other.id;
         }

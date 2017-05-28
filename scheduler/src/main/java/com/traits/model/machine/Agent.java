@@ -17,4 +17,16 @@ public class Agent extends Machine {
     public WorkersPool getWorkersPool() {
         return workersPool;
     }
+
+    public void init() {
+
+    }
+
+    public void start() {
+
+    }
+
+    public void stop() {
+
+    }
 }
