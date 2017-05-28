@@ -1,10 +1,11 @@
 package com.traits.scheduler;
 
-import com.traits.db.RedisHandler;
+import com.traits.db.handler.RedisHandler;
 import com.traits.model.*;
-import com.traits.storage.BaseStorage;
-import com.traits.storage.MongoDBStorage;
-import com.traits.storage.MySQLStorage;
+import com.traits.db.dao.BaseDao;
+import com.traits.db.dao.MongoDBDao;
+import com.traits.db.dao.MySQLDao;
+import com.traits.model.machine.WorkersPool;
 import com.traits.util.SerializeUtil;
 import org.apache.log4j.Logger;
 import org.quartz.DisallowConcurrentExecution;
@@ -60,16 +61,16 @@ public class WorkTrigger implements Job {
 
         logger.info(">> WorkTrigger execute");
 
-        BaseStorage _storage = null;
+        BaseDao _storage = null;
         ProjectEntity project = null;
 
         try {
             if (dbtype.equals("mysql")) {
-                _storage = new MySQLStorage(host, port, database, user, passwd);
+                _storage = new MySQLDao(host, port, database, user, passwd);
             } else if (dbtype.equals("mongodb")) {
-                _storage = new MongoDBStorage(host, port, database, user, passwd);
+                _storage = new MongoDBDao(host, port, database, user, passwd);
             } else {
-                _storage = new MySQLStorage(host, port, database, user, passwd);
+                _storage = new MySQLDao(host, port, database, user, passwd);
             }
         } catch (Exception e) {
             logger.error(e.getMessage());

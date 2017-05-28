@@ -16,11 +16,11 @@ import java.util.HashMap;
  CREATE TABLE `projectdb` (
  `id` varchar(100) NOT NULL DEFAULT '' COMMENT 'project id',
  `name` varchar(512) DEFAULT NULL,
- `status` tinyint(4) DEFAULT NULL COMMENT '-1-unknown; 0-stop; 1-running; 2-delete; 3-debug; 4-checking',
+ `status` tinyint(4) DEFAULT NULL COMMENT '-1:unknown; 0-stop; 1:running; 2:delete; 3:debug; 4:checking',
  `crontab` varchar(128) DEFAULT NULL,
  `group` varchar(64) DEFAULT NULL,
  `dependence` varchar(1024) DEFAULT NULL,
- `type` tinyint(4) DEFAULT NULL COMMENT '-1:unknown; 0-shell; 1-python; ',
+ `type` tinyint(4) DEFAULT NULL COMMENT '-1:unknown; 0:shell; 1:python; ',
  `user` varchar(128) DEFAULT NULL,
  `package` varchar(1024) DEFAULT NULL,
  `execfile` varchar(1024) NOT NULL,

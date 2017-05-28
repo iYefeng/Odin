@@ -1,4 +1,4 @@
-package com.traits.db;
+package com.traits.db.handler;
 
 import org.apache.log4j.Logger;
 import redis.clients.jedis.Jedis;

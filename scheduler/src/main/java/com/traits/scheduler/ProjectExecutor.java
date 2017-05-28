@@ -4,9 +4,9 @@ import com.traits.jython.JythonEvaluable;
 import com.traits.model.ProjectEntity;
 import com.traits.model.TaskEntity;
 import com.traits.model.Configure;
-import com.traits.storage.BaseStorage;
-import com.traits.storage.MongoDBStorage;
-import com.traits.storage.MySQLStorage;
+import com.traits.db.dao.BaseDao;
+import com.traits.db.dao.MongoDBDao;
+import com.traits.db.dao.MySQLDao;
 import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -46,7 +46,7 @@ public class ProjectExecutor implements Job {
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
         logger.info(">> ProjectExecutor execute");
-        BaseStorage _storage = null;
+        BaseDao _storage = null;
 
         JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
         this.project = (ProjectEntity) jobDataMap.get("currentProject");
@@ -96,11 +96,11 @@ public class ProjectExecutor implements Job {
 
         try {
             if (dbtype.equals("mysql")) {
-                _storage = new MySQLStorage(host, port, database, user, passwd);
+                _storage = new MySQLDao(host, port, database, user, passwd);
             } else if (dbtype.equals("mongodb")) {
-                _storage = new MongoDBStorage(host, port, database, user, passwd);
+                _storage = new MongoDBDao(host, port, database, user, passwd);
             } else {
-                _storage = new MySQLStorage(host, port, database, user, passwd);
+                _storage = new MySQLDao(host, port, database, user, passwd);
             }
         } catch (Exception e) {
             logger.error(e.getMessage());

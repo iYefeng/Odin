@@ -1,8 +1,8 @@
-package com.traits.storage;
+package com.traits.db.dao;
 
 import com.traits.model.TaskEntity;
 import org.apache.commons.lang3.StringUtils;
-import com.traits.db.MySQLHandler;
+import com.traits.db.handler.MySQLHandler;
 import com.traits.model.ProjectEntity;
 
 import java.sql.SQLException;
@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * Created by YeFeng on 2016/7/16.
  */
-public class MySQLStorage extends BaseStorage {
+public class MySQLDao extends BaseDao {
 
     private String host;
     private int port;
@@ -23,7 +23,7 @@ public class MySQLStorage extends BaseStorage {
 
     private static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public MySQLStorage(String host, int port, String database, String user, String passwd) throws SQLException {
+    public MySQLDao(String host, int port, String database, String user, String passwd) throws SQLException {
         this.host = host;
         this.port = port;
         this.database = database;
@@ -93,7 +93,7 @@ public class MySQLStorage extends BaseStorage {
     }
 
     public static void main(String[] args) throws SQLException {
-        MySQLStorage ms = new MySQLStorage("127.0.0.1", 3306, "scheduler", "dev", "123456");
+        MySQLDao ms = new MySQLDao("127.0.0.1", 3306, "scheduler", "dev", "123456");
         ArrayList<ProjectEntity> projects = ms.getProjects();
 
         for (ProjectEntity i : projects) {

@@ -1,4 +1,4 @@
-package com.traits.scheduler;
+package com.traits.model.machine;
 
 import com.traits.model.Configure;
 import com.traits.model.TaskEntity;

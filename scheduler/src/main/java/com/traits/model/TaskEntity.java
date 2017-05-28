@@ -1,6 +1,6 @@
 package com.traits.model;
 
-import com.traits.db.MySQLHandler;
+import com.traits.db.handler.MySQLHandler;
 import com.traits.executor.BaseExecutor;
 import com.traits.executor.PythonScript;
 import com.traits.executor.ShellScript;

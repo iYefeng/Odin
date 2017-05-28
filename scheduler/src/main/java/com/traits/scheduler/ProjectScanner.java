@@ -2,9 +2,9 @@ package com.traits.scheduler;
 
 import com.traits.model.ProjectEntity;
 import com.traits.model.Configure;
-import com.traits.storage.BaseStorage;
-import com.traits.storage.MongoDBStorage;
-import com.traits.storage.MySQLStorage;
+import com.traits.db.dao.BaseDao;
+import com.traits.db.dao.MongoDBDao;
+import com.traits.db.dao.MySQLDao;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -40,15 +40,15 @@ public class ProjectScanner {
 
     public boolean loadProjects() {
         logger.info(">> loading projects");
-        BaseStorage _storage = null;
+        BaseDao _storage = null;
 
         try {
             if (dbtype.equals("mysql")) {
-                _storage = new MySQLStorage(host, port, database, user, passwd);
+                _storage = new MySQLDao(host, port, database, user, passwd);
             } else if (dbtype.equals("mongodb")) {
-                _storage = new MongoDBStorage(host, port, database, user, passwd);
+                _storage = new MongoDBDao(host, port, database, user, passwd);
             } else {
-                _storage = new MySQLStorage(host, port, database, user, passwd);
+                _storage = new MySQLDao(host, port, database, user, passwd);
             }
 
             for (Map.Entry<String, ProjectEntity> p: _projectMap.entrySet()) {  //// set project to delete

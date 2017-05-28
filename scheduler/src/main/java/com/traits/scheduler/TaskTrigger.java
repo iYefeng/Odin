@@ -1,13 +1,13 @@
 package com.traits.scheduler;
 
-import com.traits.db.RedisHandler;
+import com.traits.db.handler.RedisHandler;
 import com.traits.model.ProjectEntity;
 import com.traits.model.TaskEntity;
 import com.traits.model.Configure;
 import com.traits.model.TaskCache;
-import com.traits.storage.BaseStorage;
-import com.traits.storage.MongoDBStorage;
-import com.traits.storage.MySQLStorage;
+import com.traits.db.dao.BaseDao;
+import com.traits.db.dao.MongoDBDao;
+import com.traits.db.dao.MySQLDao;
 import com.traits.util.SerializeUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -74,35 +74,35 @@ public class TaskTrigger implements Job {
         }
     }
 
-    public void loadProjects(BaseStorage _storage) throws Exception {
+    public void loadProjects(BaseDao _storage) throws Exception {
         _projectMap = new HashMap<String, ProjectEntity>();
         for (ProjectEntity p : _storage.getProjects()) {
             _projectMap.put(p.getId(), p);
         }
     }
 
-    public void loadInitTasks(BaseStorage _storage) throws Exception {
+    public void loadInitTasks(BaseDao _storage) throws Exception {
         _initTaskMap = new HashMap<String, TaskEntity>();
         for (TaskEntity t : _storage.getInitTasks()) {
             _initTaskMap.put(t.getId(), t);
         }
     }
 
-    public void loadCheckingTasks(BaseStorage _storage) throws Exception {
+    public void loadCheckingTasks(BaseDao _storage) throws Exception {
         _checkingTaskMap = new HashMap<String, TaskEntity>();
         for (TaskEntity t : _storage.getCheckingTasks()) {
             _checkingTaskMap.put(t.getId(), t);
         }
     }
 
-    public void loadActiveTasks(BaseStorage _storage) throws Exception {
+    public void loadActiveTasks(BaseDao _storage) throws Exception {
         _activeTaskMap = new HashMap<String, TaskEntity>();
         for (TaskEntity t : _storage.getActiveTasks()) {
             _activeTaskMap.put(t.getId(), t);
         }
     }
 
-    public void loadSuccessOrPassedTask(BaseStorage _storage) throws Exception {
+    public void loadSuccessOrPassedTask(BaseDao _storage) throws Exception {
         _successOrPassedTaskSet = _storage.getSuccessOrPassedTasks();
     }
 
@@ -231,15 +231,15 @@ public class TaskTrigger implements Job {
 
     public void initLoad() {
         logger.info(">> TaskTrigger initLoad Task");
-        BaseStorage _storage = null;
+        BaseDao _storage = null;
         TaskCache tc = TaskCache.getInstance();
         try {
             if (dbtype.equals("mysql")) {
-                _storage = new MySQLStorage(host, port, database, user, passwd);
+                _storage = new MySQLDao(host, port, database, user, passwd);
             } else if (dbtype.equals("mongodb")) {
-                _storage = new MongoDBStorage(host, port, database, user, passwd);
+                _storage = new MongoDBDao(host, port, database, user, passwd);
             } else {
-                _storage = new MySQLStorage(host, port, database, user, passwd);
+                _storage = new MySQLDao(host, port, database, user, passwd);
             }
 
             loadCheckingTasks(_storage);
@@ -275,7 +275,7 @@ public class TaskTrigger implements Job {
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
         logger.info(">> TaskTrigger execute");
-        BaseStorage _storage = null;
+        BaseDao _storage = null;
         TaskCache tc = TaskCache.getInstance();
 
 //        try {
@@ -288,11 +288,11 @@ public class TaskTrigger implements Job {
 
         try {
             if (dbtype.equals("mysql")) {
-                _storage = new MySQLStorage(host, port, database, user, passwd);
+                _storage = new MySQLDao(host, port, database, user, passwd);
             } else if (dbtype.equals("mongodb")) {
-                _storage = new MongoDBStorage(host, port, database, user, passwd);
+                _storage = new MongoDBDao(host, port, database, user, passwd);
             } else {
-                _storage = new MySQLStorage(host, port, database, user, passwd);
+                _storage = new MySQLDao(host, port, database, user, passwd);
             }
 
             loadProjects(_storage);

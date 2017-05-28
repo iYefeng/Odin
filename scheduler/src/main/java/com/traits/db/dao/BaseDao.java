@@ -1,4 +1,4 @@
-package com.traits.storage;
+package com.traits.db.dao;
 
 import com.traits.model.ProjectEntity;
 import com.traits.model.TaskEntity;
@@ -9,13 +9,13 @@ import java.util.*;
 /**
  * Created by YeFeng on 2016/7/16.
  */
-public class BaseStorage {
+public class BaseDao {
 
-    public BaseStorage() {}
+    public BaseDao() {}
 
     public void release() {}
 
-    public BaseStorage(String host, int port, String database, String user, String passwd) {}
+    public BaseDao(String host, int port, String database, String user, String passwd) {}
 
     public ArrayList<ProjectEntity> getProjects() throws Exception {
         return new ArrayList<ProjectEntity>();
