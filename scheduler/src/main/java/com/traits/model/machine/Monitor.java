@@ -5,6 +5,6 @@ package com.traits.model.machine;
  */
 public class Monitor {
 
-
+	
 
 }
