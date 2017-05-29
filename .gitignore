@@ -1,5 +1,4 @@
 */target/
-*/.idea/
 *.ipr
 *.iws
 *.iml
@@ -13,4 +12,3 @@ packages
 .settings
 .classpath
 .project
-.idea
