@@ -1,4 +1,4 @@
-package com.traits.scheduler;
+package com.traits.model.machine;
 
 import com.traits.jython.JythonEvaluable;
 import com.traits.model.entity.TaskDef;
@@ -24,7 +24,7 @@ import java.util.HashMap;
 /**
  * Created by YeFeng on 2016/5/18.
  */
-public class ProjectExecutor implements Job {
+public class TaskInstMaker implements Job {
 
     static final Logger logger = Logger.getLogger("scheduler");
     private TaskDef taskDef;
@@ -32,7 +32,7 @@ public class ProjectExecutor implements Job {
     private int port;
 
 
-    public ProjectExecutor() {
+    public TaskInstMaker() {
         Configure conf = Configure.getSingleton();
         dbtype = conf.dbtype;
         host = conf.host;
@@ -45,7 +45,7 @@ public class ProjectExecutor implements Job {
     private static SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        logger.info(">> ProjectExecutor execute");
+        logger.info(">> TaskInstMaker execute");
         BaseDao _storage = null;
 
         JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
@@ -129,6 +129,6 @@ public class ProjectExecutor implements Job {
         if (_storage != null) {
             _storage.release();
         }
-        logger.info("<< ProjectExecutor execute");
+        logger.info("<< TaskInstMaker execute");
     }
 }

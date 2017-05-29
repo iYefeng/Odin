@@ -1,7 +1,6 @@
 package com.traits.model.machine;
 
 import com.traits.model.entity.TaskDef;
-import com.traits.scheduler.ProjectExecutor;
 import com.traits.scheduler.ProjectScanner;
 import com.traits.scheduler.SysScheduler;
 import org.apache.log4j.Logger;
@@ -43,7 +42,7 @@ public class TaskRegister implements Job {
                         if (p.getStatus() == TaskDef.Status.RUNNING
                                 || p.getStatus() == TaskDef.Status.DEBUG) {
                             logger.debug("Add a running project");
-                            JobDetail jobDetail = newJob(ProjectExecutor.class)
+                            JobDetail jobDetail = newJob(TaskInstMaker.class)
                                     .withIdentity(p.getId(), JOB_GROUP_NAME).build();
                             jobDetail.getJobDataMap().put("currentProject", p);
                             Trigger trigger = null;
@@ -91,7 +90,7 @@ public class TaskRegister implements Job {
                         // add new task
                         if (p.getStatus() == TaskDef.Status.RUNNING
                                 || p.getStatus() == TaskDef.Status.DEBUG) {
-                            JobDetail jobDetail = newJob(ProjectExecutor.class)
+                            JobDetail jobDetail = newJob(TaskInstMaker.class)
                                     .withIdentity(p.getId(), JOB_GROUP_NAME).build();
                             jobDetail.getJobDataMap().put("currentProject", p);
                             Trigger trigger = null;
